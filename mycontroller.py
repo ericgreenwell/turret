@@ -3,6 +3,8 @@ import time
 import RPi.GPIO as GPIO
 #import asyncio
 import serial
+import subprocess
+from multiprocessing import Process, Queue
 
 ############## Open connection to Mount#############
 ser = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
@@ -16,7 +18,9 @@ ser.write(':SR9#') # set speed
 print "Mount Speed Max"
 ser.write(':MH#')   #move mount home preassigned zero position
 print ser.read()
-print "Moving home"
+#print "Moving home"
+#time.sleep(5)   # replace this with home subprocess
+
 ############################################################
 # Set speed "SRn#" where n=1-9
 # mimic arrow press ":m[n,e,s,w]#" 
@@ -56,24 +60,9 @@ joystick.init()
 
 
 ############### function definitions ###########
-def panLEFT(LR, dir_1, step_1, wait1):
+def panLEFT():
     ser.write(':ms#')
     #ser.write(':qD#')
-    """GPIO.output(dir_1, True)
-    GPIO.output(step_1,True)
-    GPIO.output(step_1,False)
-    print("moving left", LR)
-    #time.sleep(wait1)
-    """
-def panRIGHT(LR, dir_1, step_1, wait1):
-    ser.write(':mn#')
-    #ser.write(':qD#')
-    """GPIO.output(dir_1, False)
-    GPIO.output(step_1,True)
-    GPIO.output(step_1,False)
-    print("moving right", LR) 
-    #time.sleep(wait1)
-"""
 def zoomIN():
     GPIO.output(one32, True)
     pass
@@ -84,14 +73,15 @@ def home():
     print("going home")
     ser.write(':MH#')
     
-
+left = None
 done = False
 ############### handler ##################       
+#if name = "__main__":
+
 while done==False:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done == True
-             
     LR = joystick.get_axis(2)        
     home = joystick.get_button(0)
     UD = joystick.get_axis(5)
@@ -99,18 +89,16 @@ while done==False:
     LUD = joystick.get_axis(1)
     zoomIN = joystick.get_button(4)
     zoomOUT = joystick.get_button(5)
+    
+    left = Process(target=panLEFT)
 
     if LR < -threshold:
-        panLEFT(LR, dir_1, step_1, wait1)
-        
-    elif LR > threshold:
-        panRIGHT(LR, dir_1, step_1, wait1)
+       # panLEFT(LR, dir_1, step_1, wait1)
+       # left = subprocess.Popen("panLEFT",stdout=subprocess.PIPE, shell=True)
+        left.start()
+    elif -threshold < LR < threshold:
+        ser.write(':qD#')
 
-    elif UD < -threshold:
-        tiltUP(UD, dir_2, step_2, wait2)
-
-    elif UD > threshold:
-        tiltDOWN(UD, dir_2, step_2, wait2)
 
     elif zoomIN:
         #zoomIN()
