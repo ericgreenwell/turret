@@ -4,13 +4,12 @@ import RPi.GPIO as GPIO
 #import asyncio
 import serial
 
-# Open connection to Mount
+############## Open connection to Mount#############
 ser = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
 
 ser.write(':V#')
 print ser.read()
 print "Initializing connection"
-
 ser.write(':MountInfo#')
 print ser.read()
 ser.write(':SR9#') # set speed
@@ -18,22 +17,16 @@ print "Mount Speed Max"
 ser.write(':MH#')   #move mount home preassigned zero position
 print ser.read()
 print "Moving home"
-
+############################################################
 # Set speed "SRn#" where n=1-9
 # mimic arrow press ":m[n,e,s,w]#" 
-# to stop this ":q#" or ":q[R,D]#" for up/dwn
+# to stop this ":q#" or ":q[R,D]#" for 
 
 
-
-
-#ser.close()
-
-
-
+########## GPIO SETUP #############3
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-#sudo ds4drv
 
 # Label Pins
 dir_1 = 25
@@ -44,23 +37,16 @@ one32 = 12  #pin for 1/32 of a step
 
 #Setup Pins
 GPIO.setup(dir_1, GPIO.OUT)
-#GPIO.setup(dir_2, GPIO.OUT)
 GPIO.setup(step_1, GPIO.OUT)
-#GPIO.setup(step_2, GPIO.OUT)
-
 GPIO.setup(home_1, GPIO.IN)
-#GPIO.setup(home_2, GPIO.IN)
-
 #fine motion
 GPIO.setup(one32, GPIO.OUT)
-
+#################################################
 #settings for motors
 axisUpDown = 5
 axisLeftRight = 2
 interval = float(0.1)
 wait1 = .0001    #wait time dictates the speed of the stepper motor
-wait2 = .0001
-
 threshold = .15
 ############# initialize Pygame ###############
 pygame.init()
@@ -88,21 +74,6 @@ def panRIGHT(LR, dir_1, step_1, wait1):
     print("moving right", LR) 
     #time.sleep(wait1)
 """
-#def tiltUP(UD, dir_2, step_2, wait2):
-#    GPIO.output(dir_2, True)
-#    GPIO.output(step_2,True)
-#    GPIO.output(step_2,False)
-#    print("moving up", UD)
-    #time.sleep(wait2)
-    
-#def tiltDOWN(UD, dir_2, step_2, wait2):
-#    GPIO.output(dir_2, False)
-#    GPIO.output(step_2,True)
-#    GPIO.output(step_2,False)
-#    print("moving Down", UD)
-    #time.sleep(wait2)
-
-
 def zoomIN():
     GPIO.output(one32, True)
     pass
@@ -141,21 +112,14 @@ while done==False:
     elif UD > threshold:
         tiltDOWN(UD, dir_2, step_2, wait2)
 
-    elif LLR < -threshold:
-        panLEFTfine(LLR, dir_1, step_1, wait1, one32)
-        
-    elif LLR > threshold:
-        panRIGHTfine(LLR, dir_1, step_1, wait1, one32)
-
     elif zoomIN:
         #zoomIN()
         pass
 
     elif home:
         home()
-    
-   
-    time.sleep(.0000001)
+
+    time.sleep(.001)
    
     
 ############EOF###############
