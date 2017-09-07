@@ -5,17 +5,19 @@ import RPi.GPIO as GPIO
 import serial
 
 # Open connection to Mount
-ser = serial.Serial('/dev/ttyUSB0', baudrate=9600, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, bytesize=serial_EIGHTBITS, timeout =0)
+ser = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
 
 ser.write(':V#')
 print ser.read()
+print "Initializing connection"
 
 ser.write(':MountInfo#')
 print ser.read()
 ser.write(':SR9#') # set speed
-
+print "Mount Speed Max"
 ser.write(':MH#')   #move mount home preassigned zero position
 print ser.read()
+print "Moving home"
 
 # Set speed "SRn#" where n=1-9
 # mimic arrow press ":m[n,e,s,w]#" 
@@ -42,12 +44,12 @@ one32 = 12  #pin for 1/32 of a step
 
 #Setup Pins
 GPIO.setup(dir_1, GPIO.OUT)
-GPIO.setup(dir_2, GPIO.OUT)
+#GPIO.setup(dir_2, GPIO.OUT)
 GPIO.setup(step_1, GPIO.OUT)
-GPIO.setup(step_2, GPIO.OUT)
+#GPIO.setup(step_2, GPIO.OUT)
 
 GPIO.setup(home_1, GPIO.IN)
-GPIO.setup(home_2, GPIO.IN)
+#GPIO.setup(home_2, GPIO.IN)
 
 #fine motion
 GPIO.setup(one32, GPIO.OUT)
@@ -70,7 +72,7 @@ joystick.init()
 ############### function definitions ###########
 def panLEFT(LR, dir_1, step_1, wait1):
     ser.write(':ms#')
-    ser.write(':qD#')
+    #ser.write(':qD#')
     """GPIO.output(dir_1, True)
     GPIO.output(step_1,True)
     GPIO.output(step_1,False)
@@ -79,69 +81,27 @@ def panLEFT(LR, dir_1, step_1, wait1):
     """
 def panRIGHT(LR, dir_1, step_1, wait1):
     ser.write(':mn#')
-    ser.write(':qD#')
+    #ser.write(':qD#')
     """GPIO.output(dir_1, False)
     GPIO.output(step_1,True)
     GPIO.output(step_1,False)
     print("moving right", LR) 
     #time.sleep(wait1)
 """
-def tiltUP(UD, dir_2, step_2, wait2):
-    GPIO.output(dir_2, True)
-    GPIO.output(step_2,True)
-    GPIO.output(step_2,False)
-    print("moving up", UD)
+#def tiltUP(UD, dir_2, step_2, wait2):
+#    GPIO.output(dir_2, True)
+#    GPIO.output(step_2,True)
+#    GPIO.output(step_2,False)
+#    print("moving up", UD)
     #time.sleep(wait2)
     
-def tiltDOWN(UD, dir_2, step_2, wait2):
-    GPIO.output(dir_2, False)
-    GPIO.output(step_2,True)
-    GPIO.output(step_2,False)
-    print("moving Down", UD)
+#def tiltDOWN(UD, dir_2, step_2, wait2):
+#    GPIO.output(dir_2, False)
+#    GPIO.output(step_2,True)
+#    GPIO.output(step_2,False)
+#    print("moving Down", UD)
     #time.sleep(wait2)
 
-"""
-#start fine controls
-def panLEFTfine(LLR, dir_1, step_1, wait1, one32):
-    GPIO.output(one32,True)
-    GPIO.output(dir_1, True)
-    
-    GPIO.output(step_1,True)
-    GPIO.output(step_1,False)
-    print("fine left", LR)
-    #time.sleep(wait1)
-    GPIO.output(one32,False)
-    
-def panRIGHTfine(LLR, dir_1, step_1, wait1, one32):
-    GPIO.output(one32,True)
-    GPIO.output(dir_1, False)
-    
-    GPIO.output(step_1,True)
-    GPIO.output(step_1,False)
-    print("fine right", LR) 
-    #time.sleep(wait1)
-    GPIO.output(one32,False)
-def tiltUPfine(LUD, dir_2, step_2, wait2, one32):
-    GPIO.output(one32,True)
-    GPIO.output(dir_2, True)
-    
-    GPIO.output(step_2,True)
-    GPIO.output(step_2,False)
-    print("fine up", UD)
-    #time.sleep(wait2)
-    GPIO.output(one32,False)
-    
-def tiltDOWNfine(LUD, dir_2, step_2, wait2, one32):
-    GPIO.output(one32,True)
-    GPIO.output(dir_2, False)
-    
-    GPIO.output(step_2,True)
-    GPIO.output(step_2,False)
-    print("fine Down", UD)
-    #time.sleep(wait2)
-    GPIO.output(one32,False)
-#end fine contols
-"""
 
 def zoomIN():
     GPIO.output(one32, True)
