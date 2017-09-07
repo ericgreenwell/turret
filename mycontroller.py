@@ -1,6 +1,32 @@
 import pygame
 import time
 import RPi.GPIO as GPIO
+#import asyncio
+import serial
+
+# Open connection to Mount
+ser = serial.Serial('/dev/ttyUSB0', baudrate=9600, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, bytesize=serial_EIGHTBITS, timeout =0)
+
+ser.write(':V#')
+print ser.read()
+
+ser.write(':MountInfo#')
+print ser.read()
+ser.write(':SR9#') # set speed
+
+ser.write(':MH#')   #move mount home preassigned zero position
+print ser.read()
+
+# Set speed "SRn#" where n=1-9
+# mimic arrow press ":m[n,e,s,w]#" 
+# to stop this ":q#" or ":q[R,D]#" for up/dwn
+
+
+
+
+#ser.close()
+
+
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -9,13 +35,8 @@ GPIO.setwarnings(False)
 
 # Label Pins
 dir_1 = 25
-dir_2 = 18
-
 step_1 = 23
-step_2 = 24
-
 home_1 = 21
-home_2 = 20
 
 one32 = 12  #pin for 1/32 of a step
 
@@ -48,21 +69,23 @@ joystick.init()
 
 ############### function definitions ###########
 def panLEFT(LR, dir_1, step_1, wait1):
-    
-    GPIO.output(dir_1, True)
+    ser.write(':ms#')
+    ser.write(':qD#')
+    """GPIO.output(dir_1, True)
     GPIO.output(step_1,True)
     GPIO.output(step_1,False)
     print("moving left", LR)
     #time.sleep(wait1)
-    
+    """
 def panRIGHT(LR, dir_1, step_1, wait1):
-    
-    GPIO.output(dir_1, False)
+    ser.write(':mn#')
+    ser.write(':qD#')
+    """GPIO.output(dir_1, False)
     GPIO.output(step_1,True)
     GPIO.output(step_1,False)
     print("moving right", LR) 
     #time.sleep(wait1)
-
+"""
 def tiltUP(UD, dir_2, step_2, wait2):
     GPIO.output(dir_2, True)
     GPIO.output(step_2,True)
@@ -77,7 +100,7 @@ def tiltDOWN(UD, dir_2, step_2, wait2):
     print("moving Down", UD)
     #time.sleep(wait2)
 
-
+"""
 #start fine controls
 def panLEFTfine(LLR, dir_1, step_1, wait1, one32):
     GPIO.output(one32,True)
@@ -118,7 +141,7 @@ def tiltDOWNfine(LUD, dir_2, step_2, wait2, one32):
     #time.sleep(wait2)
     GPIO.output(one32,False)
 #end fine contols
-
+"""
 
 def zoomIN():
     GPIO.output(one32, True)
@@ -127,7 +150,9 @@ def zoomOUT():
     pass
 
 def home():
-    print("going home") 
+    print("going home")
+    ser.write(':MH#')
+    
 
 done = False
 ############### handler ##################       
@@ -167,11 +192,10 @@ while done==False:
         pass
 
     elif home:
-        pass
-        #home()
+        home()
     
    
-    #time.sleep(.0000001)
+    time.sleep(.0000001)
    
     
 ############EOF###############
