@@ -81,11 +81,13 @@ while done==False:
     if LR < -threshold and not flagLeft:
         ser.write(":mn#")
 	flagLeft = True
+	flagStop = False
 	print "lefting"
 
     elif LR > threshold and not flagRight:
         ser.write(":ms#")
         flagRight = True
+	flagStop = False
 	print "Righting"
 
     elif LR > -threshold and LR < threshold and not flagStop:
