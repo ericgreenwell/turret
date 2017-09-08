@@ -1,26 +1,21 @@
 import pygame
 import time
 import RPi.GPIO as GPIO
-#import asyncio
 import serial
 import subprocess
-from multiprocessing import Process, Queue
+
 
 ############## Open connection to Mount#############
 ser = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
 
 ser.write(':V#')
-#print ser.read()
 print "Initializing connection"
 ser.write(':MountInfo#')
-#print ser.read()
 ser.write(':SR9#') # set speed
 print "Mount Speed Max"
 ser.write(':MH#')   #move mount home preassigned zero position
-print ser.read()
 print "Moving home"
 time.sleep(5)  
-ser.write(':SR9#')
 ############################################################
 # Set speed "SRn#" where n=1-9
 # mimic arrow press ":m[n,e,s,w]#" 
@@ -65,7 +60,9 @@ joystick.init()
 done = False
 ############### handler ##################       
 #if name = "__main__":
-
+flagLeft = False
+flagRight = False
+flagStop = False
 
 while done==False:
 #    for event in pygame.event.get():
@@ -79,23 +76,16 @@ while done==False:
     #zoomIN = joystick.get_button(4)
     #zoomOUT = joystick.get_button(5)
     ########## FLAGS #############
-    flagLeft = False
-    flagRight = False    
-    flagStop = False
     
-    if LR < -threshold:
+    if LR < -threshold and not flagLeft:
         ser.write(":mn#")
 	flagLeft = True
 	print "lefting"
 
-    elif LR > threshold and flagRight:
+    elif LR > threshold and not flagRight:
         ser.write(":ms#")
         flagRight = True
 	print "Righting"
-
-    elif home:
-        ser.write(":MH#")
-	print "homing"
 
     elif -threshold < LR < threshold and not flagStop:
         ser.write(":q#")
@@ -103,6 +93,11 @@ while done==False:
 	flagRight= False
         flagStop = True
 	print "stopping"
+	
+    elif home:
+        ser.write(":MH#")
+	print "homing"
+
   # print ser.read()
     
 ############EOF###############
