@@ -61,7 +61,7 @@ joystick.init()
 
 ############### function definitions ###########
 def panLEFT():
-    ser.write(':ms#')
+    ser.write(':mn#')
     #ser.write(':qD#')
 def zoomIN():
     GPIO.output(one32, True)
@@ -77,6 +77,7 @@ left = None
 done = False
 ############### handler ##################       
 #if name = "__main__":
+left = Process(target=panLEFT)
 
 while done==False:
     for event in pygame.event.get():
@@ -90,15 +91,15 @@ while done==False:
     zoomIN = joystick.get_button(4)
     zoomOUT = joystick.get_button(5)
     
-    left = Process(target=panLEFT)
+
 
     if LR < -threshold:
-       # panLEFT(LR, dir_1, step_1, wait1)
-       # left = subprocess.Popen("panLEFT",stdout=subprocess.PIPE, shell=True)
-        left.start()
+        ser.write(":mn#")
     elif -threshold < LR < threshold:
         ser.write(':qD#')
 
+    elif LR > threshold:
+        ser.write(":ms#")
 
     elif zoomIN:
         #zoomIN()
