@@ -65,9 +65,9 @@ flagRight = False
 flagStop = False
 
 while done==False:
-#    for event in pygame.event.get():
-#        if event.type == pygame.QUIT:
-#            done == True
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            done == True
     LR = joystick.get_axis(2)        
     home = joystick.get_button(0)
     UD = joystick.get_axis(5)
@@ -76,7 +76,8 @@ while done==False:
     #zoomIN = joystick.get_button(4)
     #zoomOUT = joystick.get_button(5)
     ########## FLAGS #############
-    
+   # print LR, home, UD
+
     if LR < -threshold and not flagLeft:
         ser.write(":mn#")
 	flagLeft = True
@@ -87,17 +88,17 @@ while done==False:
         flagRight = True
 	print "Righting"
 
-    elif -threshold < LR < threshold and not flagStop:
+    elif LR > -threshold and LR < threshold and not flagStop:
         ser.write(":q#")
 	flagLeft = False
 	flagRight= False
-        flagStop = True
+	flagStop = True
 	print "stopping"
 	
-    elif home:
-        ser.write(":MH#")
-	print "homing"
+##    elif home:
+#        ser.write(":MH#")
+#	print "homing"
 
-  # print ser.read()
-    
+
+    time.sleep(.1)    
 ############EOF###############
