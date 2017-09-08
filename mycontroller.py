@@ -10,17 +10,17 @@ from multiprocessing import Process, Queue
 ser = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
 
 ser.write(':V#')
-print ser.read()
+#print ser.read()
 print "Initializing connection"
 ser.write(':MountInfo#')
-print ser.read()
+#print ser.read()
 ser.write(':SR9#') # set speed
 print "Mount Speed Max"
 ser.write(':MH#')   #move mount home preassigned zero position
 print ser.read()
-#print "Moving home"
-#time.sleep(5)   # replace this with home subprocess
-
+print "Moving home"
+time.sleep(5)  
+ser.write(':SR9#')
 ############################################################
 # Set speed "SRn#" where n=1-9
 # mimic arrow press ":m[n,e,s,w]#" 
@@ -60,55 +60,49 @@ joystick.init()
 
 
 ############### function definitions ###########
-def panLEFT():
-    ser.write(':mn#')
-    #ser.write(':qD#')
-def zoomIN():
-    GPIO.output(one32, True)
-    pass
-def zoomOUT():
-    pass
-
-def home():
-    print("going home")
-    ser.write(':MH#')
     
-left = None
+
 done = False
 ############### handler ##################       
 #if name = "__main__":
-left = Process(target=panLEFT)
+
 
 while done==False:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done == True
+#    for event in pygame.event.get():
+#        if event.type == pygame.QUIT:
+#            done == True
     LR = joystick.get_axis(2)        
     home = joystick.get_button(0)
     UD = joystick.get_axis(5)
-    LLR = joystick.get_axis(0)
-    LUD = joystick.get_axis(1)
-    zoomIN = joystick.get_button(4)
-    zoomOUT = joystick.get_button(5)
+    #LLR = joystick.get_axis(0)
+    #LUD = joystick.get_axis(1)
+    #zoomIN = joystick.get_button(4)
+    #zoomOUT = joystick.get_button(5)
+    ########## FLAGS #############
+    flagLeft = False
+    flagRight = False    
+    flagStop = False
     
-
-
     if LR < -threshold:
         ser.write(":mn#")
-    elif -threshold < LR < threshold:
-        ser.write(':qD#')
+	flagLeft = True
+	print "lefting"
 
-    elif LR > threshold:
+    elif LR > threshold and flagRight:
         ser.write(":ms#")
-
-    elif zoomIN:
-        #zoomIN()
-        pass
+        flagRight = True
+	print "Righting"
 
     elif home:
-        home()
+        ser.write(":MH#")
+	print "homing"
 
-    time.sleep(.001)
-   
+    elif -threshold < LR < threshold and not flagStop:
+        ser.write(":q#")
+	flagLeft = False
+	flagRight= False
+        flagStop = True
+	print "stopping"
+  # print ser.read()
     
 ############EOF###############
