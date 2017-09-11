@@ -55,13 +55,18 @@ joystick.init()
 
 
 ############### function definitions ###########
-    
+def range():
+	""" place GPIO out for pressing range and range collection/analysis and motor calculations based on trigonometry
+	"""
+	pass
 
 done = False
 ############### handler ##################       
 #if name = "__main__":
 flagLeft = False
 flagRight = False
+flagUp = False
+flagDown = False
 flagStop = False
 
 while done==False:
@@ -75,8 +80,7 @@ while done==False:
     #LUD = joystick.get_axis(1)
     #zoomIN = joystick.get_button(4)
     #zoomOUT = joystick.get_button(5)
-    ########## FLAGS #############
-   # print LR, home, UD
+    ########## Conditions #############
 
     if LR < -threshold and not flagLeft:
         ser.write(":mn#")
@@ -89,18 +93,32 @@ while done==False:
         flagRight = True
 	flagStop = False
 	print "Righting"
+	
+    elif UD > threshold and not flagUp:
+	ser.write(":mn#")
+	flagUp = True
+	flagStop = False
+	print "upping"
+	
+    elif UD < -threshold and not flagDown:
+	ser.write(":ms#")
+	flagDown = True
+	flagStop = False
+	print "downing"
 
     elif LR > -threshold and LR < threshold and not flagStop:
-        ser.write(":q#")
+        ser.write(":qD#")
 	flagLeft = False
 	flagRight= False
 	flagStop = True
 	print "stopping"
-	
-##    elif home:
-#        ser.write(":MH#")
-#	print "homing"
+    elif UD > - threshold and UD < threshold and not flagStop:
+	ser.write(":qR#")
+	print "stop upping"
+    elif home:
+        ser.write(":MH#")
+	print "homing"
+        flagLeft, flagRight, flagUp, flagDown = False
 
-
-    time.sleep(.1)    
+    time.sleep(.001)    
 ############EOF###############
