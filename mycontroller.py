@@ -47,6 +47,8 @@ axisLeftRight = 2
 interval = float(0.1)
 wait1 = .0001    #wait time dictates the speed of the stepper motor
 threshold = .15
+global speed = 9
+
 ############# initialize Pygame ###############
 pygame.init()
 pygame.joystick.init()
@@ -68,6 +70,7 @@ flagRight = False
 flagUp = False
 flagDown = False
 flagStop = False
+flagSpeed = False
 
 while done==False:
     for event in pygame.event.get():
@@ -112,9 +115,21 @@ while done==False:
 	flagRight= False
 	flagStop = True
 	print "stopping"
+	
     elif UD > - threshold and UD < threshold and not flagStop:
 	ser.write(":qR#")
 	print "stop upping"
+	
+    elif #UP DPad:
+	global speed += speed
+	ser.write(":SR{}#".format(speed))
+	print "speed uping"
+    elif #Down Dpad:
+	global speed -+ speed
+	ser.write(":SR{}#".format(speed))
+	print "speed downing"
+	
+	
     elif home:
         ser.write(":MH#")
 	print "homing"
