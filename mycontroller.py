@@ -15,7 +15,7 @@ ser.write(':SR9#') # set speed
 print "Mount Speed Max"
 ser.write(':MH#')   #move mount home preassigned zero position
 print "Moving home"
-time.sleep(5)  
+time.sleep(10)  
 ############################################################
 # Set speed "SRn#" where n=1-9
 # mimic arrow press ":m[n,e,s,w]#" 
@@ -46,8 +46,9 @@ axisUpDown = 5
 axisLeftRight = 2
 interval = float(0.1)
 wait1 = .0001    #wait time dictates the speed of the stepper motor
-threshold = .15
-global speed = 9
+threshold = .35
+global speed
+speed = 9
 
 ############# initialize Pygame ###############
 pygame.init()
@@ -69,7 +70,8 @@ flagLeft = False
 flagRight = False
 flagUp = False
 flagDown = False
-flagStop = False
+flagStopPan = False
+flagStopTilt = False
 flagSpeed = False
 
 while done==False:
@@ -88,52 +90,56 @@ while done==False:
     if LR < -threshold and not flagLeft:
         ser.write(":mn#")
 	flagLeft = True
-	flagStop = False
+	flagStopPan = False
 	print "lefting"
 
     elif LR > threshold and not flagRight:
         ser.write(":ms#")
         flagRight = True
-	flagStop = False
+	flagStopPan = False
 	print "Righting"
 	
     elif UD > threshold and not flagUp:
-	ser.write(":mn#")
+	ser.write(":mw#")
 	flagUp = True
-	flagStop = False
+	flagStopTilt = False
 	print "upping"
 	
     elif UD < -threshold and not flagDown:
-	ser.write(":ms#")
+	ser.write(":me#")
 	flagDown = True
-	flagStop = False
+	flagStopTilt = False
 	print "downing"
 
-    elif LR > -threshold and LR < threshold and not flagStop:
+    elif LR > -threshold and LR < threshold and not flagStopPan:
         ser.write(":qD#")
 	flagLeft = False
 	flagRight= False
-	flagStop = True
-	print "stopping"
+	flagStopPan = True
+	print "stop lefting"
 	
-    elif UD > - threshold and UD < threshold and not flagStop:
+    elif UD > - threshold and UD < threshold and not flagStopTilt:
 	ser.write(":qR#")
 	print "stop upping"
-	
-    elif #UP DPad:
-	global speed += speed
-	ser.write(":SR{}#".format(speed))
-	print "speed uping"
-    elif #Down Dpad:
-	global speed -+ speed
-	ser.write(":SR{}#".format(speed))
-	print "speed downing"
-	
+	flagUp = False
+	flagDown = False
+	flagStopTilt = True
+
+#    elif #UP DPad:
+#	global speed += speed
+#	ser.write(":SR{}#".format(speed))
+#	print "speed uping"
+ #   elif #Down Dpad:
+#	global speed -+ speed
+#	ser.write(":SR{}#".format(speed))
+#	print "speed downing"
+#	
 	
     elif home:
         ser.write(":MH#")
 	print "homing"
         flagLeft, flagRight, flagUp, flagDown = False
+	time.sleep(10)
 
     time.sleep(.001)    
 ############EOF###############
