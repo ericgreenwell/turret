@@ -100,13 +100,13 @@ while done==False:
 	print "Righting"
 	
     elif UD > threshold and not flagUp:
-	ser.write(":mw#")
+	ser.write(":me#")
 	flagUp = True
 	flagStopTilt = False
 	print "upping"
 	
     elif UD < -threshold and not flagDown:
-	ser.write(":me#")
+	ser.write(":mw#")
 	flagDown = True
 	flagStopTilt = False
 	print "downing"
@@ -138,8 +138,15 @@ while done==False:
     elif home:
         ser.write(":MH#")
 	print "homing"
-        flagLeft, flagRight, flagUp, flagDown = False
 	time.sleep(10)
+        flagLeft = False
+	flagRight = False
+	flagUp = False
+	flagDown = False
+	
+
+    
+
 
     time.sleep(.001)    
 ############EOF###############
