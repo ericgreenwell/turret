@@ -73,6 +73,8 @@ flagDown = False
 flagStopPan = False
 flagStopTilt = False
 flagSpeed = False
+flagSpeedUp = False
+flagSpeedDown = False
 
 while done==False:
     for event in pygame.event.get():
@@ -81,6 +83,7 @@ while done==False:
     LR = joystick.get_axis(2)        
     home = joystick.get_button(0)
     UD = joystick.get_axis(5)
+    DirPad = joystick.get_hat(0)
     #LLR = joystick.get_axis(0)
     #LUD = joystick.get_axis(1)
     #zoomIN = joystick.get_button(4)
@@ -125,15 +128,18 @@ while done==False:
 	flagDown = False
 	flagStopTilt = True
 
-#    elif #UP DPad:
-#	global speed += speed
-#	ser.write(":SR{}#".format(speed))
-#	print "speed uping"
- #   elif #Down Dpad:
-#	global speed -+ speed
-#	ser.write(":SR{}#".format(speed))
-#	print "speed downing"
-#	
+    elif DirPad[1] == 1 and speed < 9:
+	speed += 1
+	ser.write(":SR{}#".format(speed))
+	print "speed uping"
+	print speed
+
+
+    elif DirPad[1] == -1 and speed > 1:
+	speed -= 1
+	ser.write(":SR{}#".format(speed))
+	print "speed downing"
+	print speed
 	
     elif home:
         ser.write(":MH#")
@@ -143,10 +149,8 @@ while done==False:
 	flagRight = False
 	flagUp = False
 	flagDown = False
-	
-
-    
+	  
 
 
-    time.sleep(.001)    
+    time.sleep(.1)    
 ############EOF###############
