@@ -1,13 +1,22 @@
-import picamera
-import image
-import tesseract
+
 # sudo apt-get install tesseract-ocr
 
 def capture():
 	picamera.capture("range.jpg")
 	
-def measure():
-	img = Image.open("/home/pi/control/range.jpg")
-	cropped_img = img.crop() # img.crop(x1,y1,x2,y2) left and top start
-	range = pytesseract.image_to_string(cropped, config= ' outputbase digits')
-	print range
+
+import pytesseract
+from PIL import Image, ImageEnhance, ImageFilter
+
+im = Image.open("num.jpg") # the second one 
+im = im.filter(ImageFilter.MedianFilter())
+enhancer = ImageEnhance.Contrast(im)
+im = enhancer.enhance(2)
+im = im.convert('1')
+im.save('temp2.jpg')
+text = pytesseract.image_to_string(Image.open('temp2.jpg'))
+print(text)
+
+
+#https://stackoverflow.com/questions/17672705/text-detection-on-seven-segment-display-via-tesseract-ocr
+#https://stackoverflow.com/questions/30479002/digital-numbers-on-tesseract-ocr
