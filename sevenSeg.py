@@ -65,6 +65,9 @@ digits = []
 for c in digitCnts:
 	# extract the digit ROI
 	(x, y, w, h) = cv2.boundingRect(c)
+	if w <= 40:
+		x = x-60
+		w = 80
 	roi = thresh[y:y + h, x:x + w]
 	cv2.imshow("roi", roi) 
 	cv2.waitKey(0)
