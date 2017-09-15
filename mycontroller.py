@@ -5,6 +5,7 @@ import serial
 import subprocess
 import picamera
 import sevenSeg
+from sevenSeg import measure
 
 ############## Open connection to Mount#############
 ser = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
@@ -55,6 +56,7 @@ wait1 = .0001    #wait time dictates the speed of the stepper motor
 threshold = .35
 global speed
 speed = 9
+range = 0
 
 ############# initialize Pygame ###############
 pygame.init()
@@ -65,11 +67,21 @@ joystick.init()
 
 ############### function definitions ###########
 def range():
-	""" 
 	camera.capture('rangeMeasure.jpg')
 	sevenSeg.measure()
-	"""
-	pass
+	return range
+	
+def rangeFocus(range):
+	range=range
+	#newport_position = somefunction
+	#newport.move_absolute_mm(self,newport_position, waitStop=True)
+	#flarePostion = somefunction based on tigonometry
+	#numsteps = 	
+	for i in range(numsteps):
+		GPIO.output(flare, True)
+		GPIO.output(flare, False)
+		time.sleep(.001)
+	print(">>> Adjusting for range of {} to target".format(range))
 
 done = False
 ############### handler ##################       
@@ -142,7 +154,6 @@ while done==False:
 	print "speed uping"
 	print speed
 
-
     elif DirPad[1] == -1 and speed > 1:
 	speed -= 1
 	ser.write(":SR{}#".format(speed))
@@ -157,7 +168,6 @@ while done==False:
 	flagRight = False
 	flagUp = False
 	flagDown = False
-	  
 
 
     time.sleep(.1)    

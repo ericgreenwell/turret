@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 
- def measure():
+def measure():
 	# define the dictionary of digit segments so we can identify
 	# each digit on the thermostat
 
@@ -24,16 +24,13 @@ import numpy as np
 	}
 
 	image = cv2.imread("rangeMeasure.jpg")
-	# crop
+	# crop THIS IS SPECIFIC TO THIS IMAGE!!!
 	image = image[2300:2700, 1400:1800]  #y:y+h x:x+w
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	kernel = np.ones((5,5), np.uint8)
 	gray = cv2.dilate(gray, kernel, iterations=2)
 	gray = cv2.erode(gray, kernel, iterations=2)
 
-	#displayCnt = None
-	#warped = four_point_transform(gray, displayCnt.reshape(4,2))
-	#ouput = four_point_transform(image, displayCnt.reshape(4,2))
 
 	thresh = cv2.threshold(gray, 0, 255,
 		cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
@@ -53,11 +50,11 @@ import numpy as np
 		(x, y, w, h) = cv2.boundingRect(c)
 
 		# if the contour is sufficiently large, it must be a digit
-		if w >= 20 and (h >= 40 and h <= 250): #and h<=40
+		if w >= 20 and (h >= 40 and h <= 250): #this eliminates "." and anomolies
 			digitCnts.append(c)
 
-	cv2.imshow("image", thresh)
-	cv2.waitKey(0)
+	#cv2.imshow("image", thresh)
+	#cv2.waitKey(0)
 	# sort the contours from left-to-right, then initialize the
 	# actual digits themselves
 	digitCnts = contours.sort_contours(digitCnts,
@@ -68,12 +65,13 @@ import numpy as np
 	for c in digitCnts:
 		# extract the digit ROI
 		(x, y, w, h) = cv2.boundingRect(c)
-		if w <= 40:
+		if w <= 40:		#account for "1" being small
 			x = x-60
 			w = 80
+		
 		roi = thresh[y:y + h, x:x + w]
-		cv2.imshow("roi", roi)
-		cv2.waitKey(0)
+		#cv2.imshow("roi", roi)
+		#cv2.waitKey(0)
 		# compute the width and height of each of the 7 segments
 		# we are going to examine
 		(roiH, roiW) = roi.shape
@@ -116,7 +114,9 @@ import numpy as np
 
 
 	# display the digits
-	print(u"{}{}.{} m".format(*digits))
-	cv2.imshow("Input", image)
+	dist = "".join([str(digits[x]) for x in range(0, len(digits) - 1)]) + "." + str(digits[-1])
+	print("Range: {}".format(dist))
+	return dist
+#	print(u"{}{}.{} m".format(*digits))
 	cv2.imshow("Output", image)
 	cv2.waitKey(0)
