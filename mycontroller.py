@@ -3,10 +3,15 @@ import time
 import RPi.GPIO as GPIO
 import serial
 import subprocess
-
+import picamera
+import sevenSeg
 
 ############## Open connection to Mount#############
 ser = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
+newport = smc100(1, '/dev/ttyUSB0', silent=False) #figure out which is which
+camera = picamera.Picamera
+
+
 
 ser.write(':V#')
 print "Initializing connection"
@@ -14,6 +19,7 @@ ser.write(':MountInfo#')
 ser.write(':SR9#') # set speed
 print "Mount Speed Max"
 ser.write(':MH#')   #move mount home preassigned zero position
+newport.home()
 print "Moving home"
 time.sleep(10)  
 ############################################################
@@ -59,7 +65,9 @@ joystick.init()
 
 ############### function definitions ###########
 def range():
-	""" place GPIO out for pressing range and range collection/analysis and motor calculations based on trigonometry
+	""" 
+	camera.capture('rangeMeasure.jpg')
+	sevenSeg.measure()
 	"""
 	pass
 
@@ -80,10 +88,10 @@ while done==False:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done == True
-    LR = joystick.get_axis(2)        
-    home = joystick.get_button(0)
-    UD = joystick.get_axis(5)
-    DirPad = joystick.get_hat(0)
+    LR = joystick.get_axis(2)        	# Right Joystick L/R
+    home = joystick.get_button(0)    	# Square
+    UD = joystick.get_axis(5)		#Right Joystick U/D
+    DirPad = joystick.get_hat(0)	#Dpad
     #LLR = joystick.get_axis(0)
     #LUD = joystick.get_axis(1)
     #zoomIN = joystick.get_button(4)
