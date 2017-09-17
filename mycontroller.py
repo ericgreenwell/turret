@@ -10,7 +10,7 @@ from sevenSeg import measure
 ############## Open connection to Mount#############
 ser = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
 newport = smc100(1, '/dev/ttyUSB0', silent=False) #figure out which is which
-camera = picamera.Picamera
+camera = picamera.Picamera()
 
 
 
@@ -49,14 +49,12 @@ GPIO.setup(home_1, GPIO.IN)
 GPIO.setup(one32, GPIO.OUT)
 #################################################
 #settings for motors
-axisUpDown = 5
-axisLeftRight = 2
-interval = float(0.1)
-wait1 = .0001    #wait time dictates the speed of the stepper motor
+
 threshold = .35
 global speed
 speed = 9
-range = 0
+global dist
+dist = 0
 
 ############# initialize Pygame ###############
 pygame.init()
@@ -69,10 +67,10 @@ joystick.init()
 def range():
 	camera.capture('rangeMeasure.jpg')
 	sevenSeg.measure()
-	return range
+	return dist
 	
-def rangeFocus(range):
-	range=range
+def rangeFocus(dist):
+	dist=dist
 	#newport_position = somefunction
 	#newport.move_absolute_mm(self,newport_position, waitStop=True)
 	#flarePostion = somefunction based on tigonometry
@@ -82,6 +80,8 @@ def rangeFocus(range):
 		GPIO.output(flare, False)
 		time.sleep(.001)
 	print(">>> Adjusting for range of {} to target".format(range))
+	# automate telescope here!
+
 
 done = False
 ############### handler ##################       
@@ -104,11 +104,14 @@ while done==False:
     home = joystick.get_button(0)    	# Square
     UD = joystick.get_axis(5)		#Right Joystick U/D
     DirPad = joystick.get_hat(0)	#Dpad
+    range = joystick.get_button(3)
     #LLR = joystick.get_axis(0)
     #LUD = joystick.get_axis(1)
     #zoomIN = joystick.get_button(4)
     #zoomOUT = joystick.get_button(5)
     ########## Conditions #############
+
+	##### Motion #######
 
     if LR < -threshold and not flagLeft:
         ser.write(":mn#")
@@ -147,7 +150,9 @@ while done==False:
 	flagUp = False
 	flagDown = False
 	flagStopTilt = True
+	
 
+	######## Speed ########
     elif DirPad[1] == 1 and speed < 9:
 	speed += 1
 	ser.write(":SR{}#".format(speed))
@@ -169,6 +174,22 @@ while done==False:
 	flagUp = False
 	flagDown = False
 
+    elif range:
+	#access measure function this may change based on range finder
+	measure()
+	rangeFocus(dist)
+
+    elif zoomIn():
+	#assign direction and take a step
+	GPIO.output(dir1, True)
+	GPIO.output(step1, True)
+	GPIO.output(step1, False)
+
+    elif zoomOut():
+	#assign direction and take a step
+	GPIO.output(dir1, False)
+	GPIO.output(step1, True)
+	GPIO.output(step1, False)
 
     time.sleep(.1)    
 ############EOF###############
