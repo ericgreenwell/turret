@@ -6,10 +6,12 @@ import subprocess
 import picamera
 import sevenSeg
 from sevenSeg import measure
+from smc100 import *
+
 
 ############## Open connection to Mount#############
 ser = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
-newport = smc100(1, '/dev/ttyUSB0', silent=False) #figure out which is which
+newport = smc100(1, '/dev/ttyUSB0', silent=False) #10 ms for each  command
 camera = picamera.Picamera()
 
 
@@ -107,8 +109,8 @@ while done==False:
     range = joystick.get_button(3)
     #LLR = joystick.get_axis(0)
     #LUD = joystick.get_axis(1)
-    #zoomIN = joystick.get_button(4)
-    #zoomOUT = joystick.get_button(5)
+    zoomIN = joystick.get_button(4)
+    zoomOUT = joystick.get_button(5)
     ########## Conditions #############
 
 	##### Motion #######
@@ -180,16 +182,21 @@ while done==False:
 	rangeFocus(dist)
 
     elif zoomIn():
+	smc.move_relative_um(100)	
+"""
 	#assign direction and take a step
 	GPIO.output(dir1, True)
 	GPIO.output(step1, True)
 	GPIO.output(step1, False)
+"""
 
     elif zoomOut():
+	smc.move_relative_um(-100)
+"""
 	#assign direction and take a step
 	GPIO.output(dir1, False)
 	GPIO.output(step1, True)
-	GPIO.output(step1, False)
+"""	GPIO.output(step1, False)
 
     time.sleep(.1)    
 ############EOF###############
