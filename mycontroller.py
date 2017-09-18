@@ -106,7 +106,8 @@ while done==False:
     home = joystick.get_button(0)    	# Square
     UD = joystick.get_axis(5)		#Right Joystick U/D
     DirPad = joystick.get_hat(0)	#Dpad
-    range = joystick.get_button(3)
+    range = joystick.get_button(3)	# X
+    track = joystick.get_button(2)	# Circle
     #LLR = joystick.get_axis(0)
     #LUD = joystick.get_axis(1)
     zoomIN = joystick.get_button(4)
@@ -152,6 +153,9 @@ while done==False:
 	flagUp = False
 	flagDown = False
 	flagStopTilt = True
+
+    elif track:
+	subprocess.call('python', '~/CMT/run.py')
 	
 
 	######## Speed ########
