@@ -10,18 +10,18 @@ from smc100 import *
 
 
 ############## Open connection to Mount#############
-ser = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
+mount = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
 newport = smc100(1, '/dev/ttyUSB0', silent=False) #10 ms for each  command
 camera = picamera.Picamera()
 
 
 
-ser.write(':V#')
+mount.write(':V#')
 print "Initializing connection"
-ser.write(':MountInfo#')
-ser.write(':SR9#') # set speed
+mount.write(':MountInfo#')
+mount.write(':SR9#') # set speed
 print "Mount Speed Max"
-ser.write(':MH#')   #move mount home preassigned zero position
+mount.write(':MH#')   #move mount home preassigned zero position
 newport.home()
 print "Moving home"
 time.sleep(10)  
@@ -116,38 +116,38 @@ while done==False:
 	##### Motion #######
 
     if LR < -threshold and not flagLeft:
-        ser.write(":mn#")
+        mount.write(":mn#")
 	flagLeft = True
 	flagStopPan = False
 	print "lefting"
 
     elif LR > threshold and not flagRight:
-        ser.write(":ms#")
+        mount.write(":ms#")
         flagRight = True
 	flagStopPan = False
 	print "Righting"
 	
     elif UD > threshold and not flagUp:
-	ser.write(":me#")
+	mount.write(":me#")
 	flagUp = True
 	flagStopTilt = False
 	print "upping"
 	
     elif UD < -threshold and not flagDown:
-	ser.write(":mw#")
+	mount.write(":mw#")
 	flagDown = True
 	flagStopTilt = False
 	print "downing"
 
     elif LR > -threshold and LR < threshold and not flagStopPan:
-        ser.write(":qD#")
+        mount.write(":qD#")
 	flagLeft = False
 	flagRight= False
 	flagStopPan = True
 	print "stop lefting"
 	
     elif UD > - threshold and UD < threshold and not flagStopTilt:
-	ser.write(":qR#")
+	mount.write(":qR#")
 	print "stop upping"
 	flagUp = False
 	flagDown = False
@@ -157,18 +157,18 @@ while done==False:
 	######## Speed ########
     elif DirPad[1] == 1 and speed < 9:
 	speed += 1
-	ser.write(":SR{}#".format(speed))
+	mount.write(":SR{}#".format(speed))
 	print "speed uping"
 	print speed
 
     elif DirPad[1] == -1 and speed > 1:
 	speed -= 1
-	ser.write(":SR{}#".format(speed))
+	mount.write(":SR{}#".format(speed))
 	print "speed downing"
 	print speed
 	
     elif home:
-        ser.write(":MH#")
+        mount.write(":MH#")
 	print "homing"
 	time.sleep(10)
         flagLeft = False
