@@ -186,21 +186,12 @@ while done==False:
 	rangeFocus(dist)
 
     elif zoomIn():
-	smc.move_relative_um(100)	
-"""
-	#assign direction and take a step
-	GPIO.output(dir1, True)
-	GPIO.output(step1, True)
-	GPIO.output(step1, False)
-"""
+	smc.move_relative_um(100)
+	# use ser.write("1PT.1")
+	time.sleep(1)
 
     elif zoomOut():
 	smc.move_relative_um(-100)
-"""
-	#assign direction and take a step
-	GPIO.output(dir1, False)
-	GPIO.output(step1, True)
-"""	GPIO.output(step1, False)
 
     time.sleep(.1)    
 ############EOF###############
