@@ -37,16 +37,16 @@ GPIO.setwarnings(False)
 
 
 # Label Pins
-dir_1 = 25
-step_1 = 23
-home_1 = 21
+dirFlare = 25
+stepFlare = 23
+homeFlare = 21
 
 one32 = 12  #pin for 1/32 of a step
 
 #Setup Pins
-GPIO.setup(dir_1, GPIO.OUT)
-GPIO.setup(step_1, GPIO.OUT)
-GPIO.setup(home_1, GPIO.IN)
+GPIO.setup(dirFlare, GPIO.OUT)
+GPIO.setup(stepFlare, GPIO.OUT)
+GPIO.setup(homeFlare, GPIO.IN)
 #fine motion
 GPIO.setup(one32, GPIO.OUT)
 #################################################
@@ -84,6 +84,15 @@ def rangeFocus(dist):
 	print(">>> Adjusting for range of {} to target".format(range))
 	# automate telescope here!
 
+def Flare(flare):
+	if flare > 0:
+		GPIO.output(dirFlare, True)
+	else:
+		GPIO.output(dirFlare, False)
+		
+	GPIO.output(stepFlare, True)
+	GPIO.output(stepFlare, False)
+	
 
 done = False
 ############### handler ##################       
@@ -109,7 +118,7 @@ while done==False:
     range = joystick.get_button(3)	# X
     track = joystick.get_button(2)	# Circle
     #LLR = joystick.get_axis(0)
-    #LUD = joystick.get_axis(1)
+    flare = joystick.get_axis(1)	# Left Joystick U/D
     zoomIN = joystick.get_button(4)
     zoomOUT = joystick.get_button(5)
     ########## Conditions #############
@@ -186,12 +195,18 @@ while done==False:
 	rangeFocus(dist)
 
     elif zoomIn():
-	smc.move_relative_um(100)
+	#smc.move_relative_um(100)
 	# use ser.write("1PT.1")
-	time.sleep(1)
-
+	#time.sleep(1)
+	GPIO.output(dirScope, True)
+	GPIO.output(stepScope, True)
+	GPIO.output(stepScope, False)
+	
     elif zoomOut():
-	smc.move_relative_um(-100)
+	#smc.move_relative_um(-100)
+	GPIO.output(dirScope, False)
+	GPIO.output(stepScope, True)
+	GPIO.output(stepScope, False)
 
     time.sleep(.1)    
 ############EOF###############
