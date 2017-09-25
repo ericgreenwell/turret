@@ -41,6 +41,10 @@ dirFlare = 25
 stepFlare = 23
 homeFlare = 21
 
+#dirScope = 
+#stepScope = 
+#homeScope = 
+
 one32 = 12  #pin for 1/32 of a step
 
 #Setup Pins
