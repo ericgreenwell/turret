@@ -117,14 +117,15 @@ while done==False:
             done == True
     LR = joystick.get_axis(2)        	# Right Joystick L/R
     home = joystick.get_button(0)    	# Square
-    UD = joystick.get_axis(5)		#Right Joystick U/D
-    DirPad = joystick.get_hat(0)	#Dpad
+    UD = joystick.get_axis(5)		# Right Joystick U/D
+    DirPad = joystick.get_hat(0)	# Dpad
     range = joystick.get_button(3)	# X
+    #button = joystick.get_button(1)    # Triangle
     track = joystick.get_button(2)	# Circle
-    #LLR = joystick.get_axis(0)
+    LLR = joystick.get_axis(0)		# Left Joystick L/R
     flare = joystick.get_axis(1)	# Left Joystick U/D
-    zoomIN = joystick.get_button(4)
-    zoomOUT = joystick.get_button(5)
+    zoomIN = joystick.get_button(4)	# Right Bumper
+    zoomOUT = joystick.get_button(5)	# Left Bumper
     ########## Conditions #############
 
 	##### Motion #######
