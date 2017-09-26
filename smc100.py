@@ -105,7 +105,7 @@ class SMC100(object):
         stopbits = 1,
         parity = 'N',
         xonxoff = True,
-        timeout = 0.050)
+        timeout = 1)
 
     self._smcID = str(smcID)
 
@@ -403,14 +403,14 @@ class SMC100(object):
     self.close()
 # Tests #####################################################################
 def test_configure():
-  smc100 = SMC100(1, '/dev/ttyS5', silent=False)
+  smc100 = SMC100(1, '/dev/ttyUSB0', silent=False)
   smc100.reset_and_configure()
   # make sure there are no errors
   assert smc100.get_status()[0] == 0
   del smc100
 
 def test_general():
-  smc100 = SMC100(1, '/dev/ttyS5', silent=False)
+  smc100 = SMC100(1, '/dev/ttyUSB0', silent=False)
   print smc100.get_position_mm()
 
   smc100.home()
