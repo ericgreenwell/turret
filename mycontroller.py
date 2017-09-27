@@ -126,6 +126,40 @@ while done==False:
     flare = joystick.get_axis(1)	# Left Joystick U/D
     zoomIN = joystick.get_button(4)	# Right Bumper
     zoomOUT = joystick.get_button(5)	# Left Bumper
+
+######## Button Map #########################
+"""
+Axes = 6
+0 Left Joystick LR
+1 Left Joystick UD
+2 Right Joystick LR
+3 Left Trigger
+4 Right Trigger
+5 Right Joystick UD
+
+Buttons: 14
+0:Square 
+1 X
+2 Circle
+3 Triangle
+4 Left Bumper
+5 Right Bumper
+6 Left Trigger 
+7 Right Trigger 
+8 Share
+9 Options
+10 Left Joystick Press
+11 Right Joystick Press
+12 PS Button
+13 Center Large Button
+
+Hats: 1
+ D-pad
+ (0,0)
+(L/R, U/D)
+ Left Minus Down Minus
+ Right Pos  Up Pos
+"""
     ########## Conditions #############
 
 	##### Motion #######
