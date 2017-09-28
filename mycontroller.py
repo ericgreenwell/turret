@@ -26,6 +26,8 @@ mount.write(':MH#')   #move mount home preassigned zero position
 newport.home()
 print "Moving home"
 time.sleep(10)  
+
+camera.preview() # start local videofeed
 ############################################################
 # Set speed "SRn#" where n=1-9
 # mimic arrow press ":m[n,e,s,w]#" 
@@ -111,6 +113,7 @@ flagStopTilt = False
 flagSpeed = False
 flagSpeedUp = False
 flagSpeedDown = False
+flagStopNewport = False
 
 while done==False:
     for event in pygame.event.get():
@@ -235,19 +238,27 @@ Hats: 1
 	measure()
 	rangeFocus(dist)
 
-    elif rightBumper():
-	smc.move_relative_um(100)
+    elif rightBumper() and not flagStopNewport:
+	newport.move_relative_um(100)
+	#newport.move_absolute_mm(25)
+	#flagStopNewport = False
 	# use ser.write("1PT.1")
 	#time.sleep(1)
 	#GPIO.output(dirScope, True)
 	#GPIO.output(stepScope, True)
 	#GPIO.output(stepScope, False)
 	
-    elif leftBumper():
-	smc.move_relative_um(-100)
+    elif leftBumper() and not flagStopNewport:
+	newport.move_relative_um(-100)
+	#flagStopNewport = False
+	#newport.move_absolute_mm(0)
 	#GPIO.output(dirScope, False)
 	#GPIO.output(stepScope, True)
 	#GPIO.output(stepScope, False)
+
+    else:
+	#flagStopTilt = True
+	pass
 
     time.sleep(.1)    
 
