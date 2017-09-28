@@ -11,9 +11,10 @@ from smc100 import *
 
 ############## Open connection to Mount#############
 mount = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
-newport = smc100(1, '/dev/ttyUSB0', silent=False) #10 ms for each  command
-camera = picamera.Picamera()
+#newport = smc100(1, '/dev/CEM60', silent=False) #10 ms for each  command
+# serial number and ID of Serial Device:
 
+camera = picamera.Picamera()
 
 
 mount.write(':V#')
@@ -88,7 +89,7 @@ def rangeFocus(dist):
 	print(">>> Adjusting for range of {} to target".format(range))
 	# automate telescope here!
 
-def Flare(flare):
+def flare(flare):
 	if flare > 0:
 		GPIO.output(dirFlare, True)
 	else:
@@ -116,7 +117,7 @@ while done==False:
         if event.type == pygame.QUIT:
             done == True
     LR = joystick.get_axis(2)        	# Right Joystick L/R
-    home = joystick.get_button(0)    	# Square
+    home = joystick.get_button(12)    	# PS Button
     UD = joystick.get_axis(5)		# Right Joystick U/D
     DirPad = joystick.get_hat(0)	# Dpad
     range = joystick.get_button(3)	# X
@@ -124,8 +125,8 @@ while done==False:
     track = joystick.get_button(2)	# Circle
     LLR = joystick.get_axis(0)		# Left Joystick L/R
     flare = joystick.get_axis(1)	# Left Joystick U/D
-    zoomIN = joystick.get_button(4)	# Right Bumper
-    zoomOUT = joystick.get_button(5)	# Left Bumper
+    rightBumper = joystick.get_button(4)	# Right Bumper
+    leftBumper = joystick.get_button(5)	# Left Bumper
 
 ######## Button Map #########################
 """
@@ -162,7 +163,7 @@ Hats: 1
 """
     ########## Conditions #############
 
-	##### Motion #######
+	###### Motion #######
 
     if LR < -threshold and not flagLeft:
         mount.write(":mn#")
@@ -203,7 +204,7 @@ Hats: 1
 	flagStopTilt = True
 
     elif track:
-	subprocess.call('python', '~/CMT/run.py')
+	subprocess.call('python', 'run.py')
 	
 
 	######## Speed ########
@@ -221,6 +222,7 @@ Hats: 1
 	
     elif home:
         mount.write(":MH#")
+	newport.home()
 	print "homing"
 	time.sleep(10)
         flagLeft = False
@@ -233,19 +235,26 @@ Hats: 1
 	measure()
 	rangeFocus(dist)
 
-    elif zoomIn():
-	#smc.move_relative_um(100)
+    elif rightBumper():
+	smc.move_relative_um(100)
 	# use ser.write("1PT.1")
 	#time.sleep(1)
-	GPIO.output(dirScope, True)
-	GPIO.output(stepScope, True)
-	GPIO.output(stepScope, False)
+	#GPIO.output(dirScope, True)
+	#GPIO.output(stepScope, True)
+	#GPIO.output(stepScope, False)
 	
-    elif zoomOut():
-	#smc.move_relative_um(-100)
-	GPIO.output(dirScope, False)
-	GPIO.output(stepScope, True)
-	GPIO.output(stepScope, False)
+    elif leftBumper():
+	smc.move_relative_um(-100)
+	#GPIO.output(dirScope, False)
+	#GPIO.output(stepScope, True)
+	#GPIO.output(stepScope, False)
 
     time.sleep(.1)    
+
+########### CLOSE ############
+newport.close()
+mount.close()
+done = True
+
 ############EOF###############
+

@@ -68,7 +68,7 @@ class SMC100(object):
 
   _sleepfunc = time.sleep
 
-  def __init__(self, smcID, port, backlash_compensation=True, silent=True, sleepfunc=None):
+  def __init__(self, smcID, port, backlash_compensation=True, silent=True, sleepfunc=True):
     """
     If backlash_compensation is False, no backlash compensation will be done.
     If silent is False, then additional output will be emitted to aid in
