@@ -237,28 +237,33 @@ Hats: 1
 	#access measure function this may change based on range finder
 	measure()
 	rangeFocus(dist)
+	
+    elif not rightBumper and not flagStopNewport:
+	newport.sendcmd('ST')
+	flagStopNewport = True
 
-    elif rightBumper() and not flagStopNewport:
-	newport.move_relative_um(100)
-	#newport.move_absolute_mm(25)
-	#flagStopNewport = False
+    elif not leftBumper and not flagStopNewport:
+	newport.sendcmd('ST')
+	flagStopNewport = True
+	
+    elif rightBumper and not flagStopNewport:
+	#newport.move_relative_um(100)
+	newport.move_absolute_mm(25)
+	flagStopNewport = False
 	# use ser.write("1PT.1")
 	#time.sleep(1)
 	#GPIO.output(dirScope, True)
 	#GPIO.output(stepScope, True)
 	#GPIO.output(stepScope, False)
 	
-    elif leftBumper() and not flagStopNewport:
-	newport.move_relative_um(-100)
-	#flagStopNewport = False
-	#newport.move_absolute_mm(0)
+    elif leftBumper and not flagStopNewport:
+	#newport.move_relative_um(-100)
+	flagStopNewport = False
+	newport.move_absolute_mm(0)
 	#GPIO.output(dirScope, False)
 	#GPIO.output(stepScope, True)
 	#GPIO.output(stepScope, False)
 
-    else:
-	#flagStopTilt = True
-	pass
 
     time.sleep(.1)    
 
