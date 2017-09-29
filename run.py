@@ -232,3 +232,4 @@ else:
 		frame += 1
 
 		print '{5:04d}: center: {0:.2f},{1:.2f} scale: {2:.2f}, active: {3:03d}, {4:04.0f}ms'.format(CMT.center[0], CMT.center[1], CMT.scale_estimate, CMT.active_keypoints.shape[0], 1000 * (toc - tic), frame)
+		return CMT.center[1], CMT.center[1]
