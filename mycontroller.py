@@ -1,4 +1,7 @@
+#!/usr/bin/env python
+
 import pygame
+import pygame.camera
 import time
 import RPi.GPIO as GPIO
 import serial
@@ -7,27 +10,28 @@ import picamera
 #import sevenSeg
 #from sevenSeg import measure
 from SMC import *
-import os
+import sys
 
 
+############## Initiate Pygame ################
 pygame.init()
-#os.environ['SDL_VIDEODRIVER'] = "dummy"
-#pygame.display.init()
-#pygame.display.set_mode((1,1))
+pygame.camera.init()
+pygame.display.init()
+screen = pygame.display.set_mode((640,480))
 pygame.joystick.init()
 joystick = pygame.joystick.Joystick(0)
 joystick.init()
 
-print "past"
+cam_list = pygame.camera.list_cameras()
+cam = pygame.camera.Camera(cam_list[0],(32,24)
+cam.start()
+
 
 
 ############## Open connection to Mount#############
-mount = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
+mount = serial.Serial('/dev/ioptron', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
 newport = SMC100(1, '/dev/newport', silent=True) #10 ms for each  command
-# serial number and ID of Serial Device:
-
-#camera = picamera.Picamera()
-
+# serial number and ID of Serial Device: persistant naming in /etc/udev/rules.d/99-usb-serial.rules
 
 mount.write(':V#')
 print "Initializing connection"
@@ -38,9 +42,7 @@ mount.write(':MH#')   #move mount home preassigned zero position
 newport.reset_and_configure()
 newport.home()
 print "Moving home"
-time.sleep(5)  
-
-#camera.preview() # start local videofeed
+  
 ############################################################
 # Set speed "SRn#" where n=1-9
 # mimic arrow press ":m[n,e,s,w]#" 
@@ -130,9 +132,17 @@ flagSpeedDown = False
 newportStopped = True
 
 while done==False:
+    image = cam.get_image()
+    image = pygame.transform.scale(image,(640,480))
+    screen.blit(image, (0,0))
+    pygame.display.update()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done == True
+	    cam.stop()
+	    pygame.quit()
+            sys.exit()
 
     LR = joystick.get_axis(2)        	# Right Joystick L/R
     home = joystick.get_button(12)    	# PS Button
@@ -258,7 +268,7 @@ while done==False:
 ########### CLOSE ############
 newport.close()
 mount.close()
-done = True
+
 
 ############EOF###############
 
