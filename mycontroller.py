@@ -11,6 +11,8 @@ import picamera
 #from sevenSeg import measure
 from SMC import *
 import sys
+#from PIL import Image
+#import pytesseract
 
 
 ############## Initiate Pygame ################
@@ -31,15 +33,14 @@ try:
 	mount = serial.Serial('/dev/ioptron', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
 	newport = SMC100(1, '/dev/newport', silent=True) #10 ms for each  command
 except:
-	pass
-#except serialException:
-#	print "One or more devices are not plugged in"
+   	print "One or more devices are not plugged in"
 
 # serial number and ID of Serial Device: persistant naming in /etc/udev/rules.d/99-usb-serial.rules
 
 mount.write(':V#')
-print "Initializing connection"
+print "Initializing hardware connection..."
 mount.write(':MountInfo#')
+print "Mount Info: {}".format(mount.readline())
 mount.write(':SR9#') # set speed
 print "Mount Speed Max"
 mount.write(':MH#')   #move mount home preassigned zero position
@@ -51,7 +52,6 @@ print "Moving home"
 # Set speed "SRn#" where n=1-9
 # mimic arrow press ":m[n,e,s,w]#" 
 # to stop this ":q#" or ":q[R,D]#" for 
-
 
 ########## GPIO SETUP #############3
 GPIO.setmode(GPIO.BCM)
@@ -77,22 +77,21 @@ GPIO.setup(homeFlare, GPIO.IN)
 GPIO.setup(one32, GPIO.OUT)
 #################################################
 #settings for motors
-
 threshold = .35
 global speed
 speed = 9
 global dist
 dist = 0
-
-############# initialize Pygame ###############
-#pygame.init()
-#pygame.joystick.init()
-#joystick = pygame.joystick.Joystick(0)
-#joystick.init()
-
-
 ############### function definitions ###########
 #def range():
+#       cam = cv2.VideoCapture(1)
+#	s, im = cam.read()
+	#may need to save/open/and turn gray
+#	text = pytesseract.image_to_string(Image.open(im))
+#	print range
+#	return range
+#	cv2.imwrite("rangeMeasure.jpg", im[0:0, 0:0]) #y:y+h x:x+w from top left
+
 #	camera.capture('rangeMeasure.jpg')
 #	sevenSeg.measure()
 #	return dist
@@ -107,7 +106,7 @@ def rangeFocus(dist):
 		GPIO.output(flare, True)
 		GPIO.output(flare, False)
 		time.sleep(.001)
-	print(">>> Adjusting for range of {} to target".format(range))
+	print(">>> Adjusting for range of {} to target".format(dist))
 	# automate telescope here!
 
 def flare(flare):
@@ -118,8 +117,6 @@ def flare(flare):
 		
 	GPIO.output(stepFlare, True)
 	GPIO.output(stepFlare, False)
-
-	
 
 done = False
 ############### handler ##################       
@@ -164,49 +161,39 @@ while done==False:
 
     ########## Conditions #############
 
-	###### Motion #######
+	###### Mount Motion #######
 
     if LR < -threshold and not flagLeft:
         mount.write(":mn#")
 	flagLeft = True
 	flagStopPan = False
-	print "lefting"
 
     elif LR > threshold and not flagRight:
         mount.write(":ms#")
         flagRight = True
 	flagStopPan = False
-	print "Righting"
-	
-    elif UD > threshold and not flagUp:
+		
+    elif UD < -threshold and not flagUp:
 	mount.write(":me#")
 	flagUp = True
 	flagStopTilt = False
-	print "uping"
-	
-    elif UD < -threshold and not flagDown:
+		
+    elif UD > threshold and not flagDown:
 	mount.write(":mw#")
 	flagDown = True
 	flagStopTilt = False
-	print "downing"
-
+	
     elif LR > -threshold and LR < threshold and not flagStopPan:
         mount.write(":qD#")
 	flagLeft = False
 	flagRight= False
 	flagStopPan = True
-	print "stop lefting"
-	
+		
     elif UD > - threshold and UD < threshold and not flagStopTilt:
 	mount.write(":qR#")
-	print "stop upping"
 	flagUp = False
 	flagDown = False
 	flagStopTilt = True
-
-    elif track:
-	subprocess.call('python', 'run.py')
-	
 
 	######## Speed ########
     elif DirPad[1] == 1 and speed < 9:
@@ -224,48 +211,33 @@ while done==False:
     elif home:
         mount.write(":MH#")
 	newport.home()
-	print "homing"
-	time.sleep(10)
         flagLeft = False
 	flagRight = False
 	flagUp = False
 	flagDown = False
+	
+############# Beam Expander Motion ##################
+	
+    elif rightBumper < threshold and leftBumper < threshold and newportStopped== False:
+	newport.sendcmd('ST')
+	newportStopped = True
+
+    elif rightBumper > threshold and newportStopped == True:
+	newport.move_absolute_mm(25)
+	newportStopped = False
+	
+    elif leftBumper > threshold and newportStopped == True:
+	newport.move_absolute_mm(0)
+	newportStopped = False
 
     elif range:
 	#access measure function this may change based on range finder
 	measure()
 	rangeFocus(dist)
-	
-    elif rightBumper < threshold and leftBumper < threshold and newportStopped== False:
-	newport.sendcmd('ST')
-	newportStopped = True
-	print "stopping right"
- 
-#    elif leftBumper < threshold and newportStopped == False:
-#	newport.sendcmd('ST')
-#	newportStopped = True
-#	print "stopping left"
-
-    elif rightBumper > threshold and newportStopped == True:
-	#newport.move_relative_um(100)
-	newport.move_absolute_mm(25)
-	newportStopped = False
-	print "right"
-	# use ser.write("1PT.1")
-	#time.sleep(1)
-	#GPIO.output(dirScope, True)
-	#GPIO.output(stepScope, True)
-	#GPIO.output(stepScope, False)
-	
-    elif leftBumper > threshold and newportStopped == True:
-	#newport.move_relative_um(-100)
-	newport.move_absolute_mm(0)
-	newportStopped = False
-	print "left"
-	#GPIO.output(dirScope, False)
-	#GPIO.output(stepScope, True)
-	#GPIO.output(stepScope, False)
-
+    """
+    elif track:
+	subprocess.call('python', 'run.py')
+    """	
 
     time.sleep(.1)    
 
@@ -274,5 +246,5 @@ newport.close()
 mount.close()
 
 
-############EOF###############
+############ EOF ###############
 
