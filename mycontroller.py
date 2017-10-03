@@ -5,8 +5,7 @@ import pygame.camera
 import time
 import RPi.GPIO as GPIO
 import serial
-import subprocess
-import picamera
+from subprocess import Popen, PIPE
 #import sevenSeg
 #from sevenSeg import measure
 from SMC import *
@@ -236,7 +235,7 @@ while done==False:
 	rangeFocus(dist)
     """
     elif track:
-	subprocess.call('python', 'run.py')
+	subprocess.call('python', 'run.py', shell=True)
     """	
 
     time.sleep(.1)    
@@ -244,7 +243,6 @@ while done==False:
 ########### CLOSE ############
 newport.close()
 mount.close()
-
 
 ############ EOF ###############
 
