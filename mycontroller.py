@@ -23,14 +23,20 @@ joystick = pygame.joystick.Joystick(0)
 joystick.init()
 
 cam_list = pygame.camera.list_cameras()
-cam = pygame.camera.Camera(cam_list[0],(32,24)
+cam = pygame.camera.Camera(cam_list[0])
 cam.start()
 
 
 
 ############## Open connection to Mount#############
-mount = serial.Serial('/dev/ioptron', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
-newport = SMC100(1, '/dev/newport', silent=True) #10 ms for each  command
+try:
+	mount = serial.Serial('/dev/ioptron', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
+	newport = SMC100(1, '/dev/newport', silent=True) #10 ms for each  command
+except:
+	pass
+#except serialException:
+#	print "One or more devices are not plugged in"
+
 # serial number and ID of Serial Device: persistant naming in /etc/udev/rules.d/99-usb-serial.rules
 
 mount.write(':V#')
@@ -134,7 +140,7 @@ newportStopped = True
 while done==False:
     image = cam.get_image()
     image = pygame.transform.scale(image,(640,480))
-    screen.blit(image, (0,0))
+    screen.blit(image,(0,0))
     pygame.display.update()
 
     for event in pygame.event.get():
