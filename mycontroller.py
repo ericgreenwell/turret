@@ -15,18 +15,16 @@ import sys
 
 ############## Initiate Pygame ################
 pygame.init()
-pygame.camera.init()
-pygame.display.init()
-screen = pygame.display.set_mode((640,480))
+#pygame.camera.init()
+#pygame.display.init()
+#screen = pygame.display.set_mode((640,480))
 pygame.joystick.init()
 joystick = pygame.joystick.Joystick(0)
 joystick.init()
 
-cam_list = pygame.camera.list_cameras()
-cam = pygame.camera.Camera(cam_list[0])
-cam.start()
-
-
+#cam_list = pygame.camera.list_cameras()
+#cam = pygame.camera.Camera(cam_list[0])
+#cam.start()
 
 ############## Open connection to Mount#############
 try:
@@ -138,17 +136,17 @@ flagSpeedDown = False
 newportStopped = True
 
 while done==False:
-    image = cam.get_image()
-    image = pygame.transform.scale(image,(640,480))
-    screen.blit(image,(0,0))
-    pygame.display.update()
+#    image = cam.get_image()
+#    image = pygame.transform.scale(image,(640,480))
+#    screen.blit(image,(0,0))
+#    pygame.display.update()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done == True
-	    cam.stop()
+	   # cam.stop()
 	    pygame.quit()
-            sys.exit()
+            #sys.exit()
 
     LR = joystick.get_axis(2)        	# Right Joystick L/R
     home = joystick.get_button(12)    	# PS Button
