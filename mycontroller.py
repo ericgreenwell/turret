@@ -4,17 +4,29 @@ import RPi.GPIO as GPIO
 import serial
 import subprocess
 import picamera
-import sevenSeg
-from sevenSeg import measure
-from smc100 import *
+#import sevenSeg
+#from sevenSeg import measure
+from SMC import *
+import os
+
+
+pygame.init()
+#os.environ['SDL_VIDEODRIVER'] = "dummy"
+#pygame.display.init()
+#pygame.display.set_mode((1,1))
+pygame.joystick.init()
+joystick = pygame.joystick.Joystick(0)
+joystick.init()
+
+print "past"
 
 
 ############## Open connection to Mount#############
 mount = serial.Serial('/dev/ttyUSB0', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
-#newport = smc100(1, '/dev/CEM60', silent=False) #10 ms for each  command
+newport = SMC100(1, '/dev/newport', silent=True) #10 ms for each  command
 # serial number and ID of Serial Device:
 
-camera = picamera.Picamera()
+#camera = picamera.Picamera()
 
 
 mount.write(':V#')
@@ -23,11 +35,12 @@ mount.write(':MountInfo#')
 mount.write(':SR9#') # set speed
 print "Mount Speed Max"
 mount.write(':MH#')   #move mount home preassigned zero position
+newport.reset_and_configure()
 newport.home()
 print "Moving home"
-time.sleep(10)  
+time.sleep(5)  
 
-camera.preview() # start local videofeed
+#camera.preview() # start local videofeed
 ############################################################
 # Set speed "SRn#" where n=1-9
 # mimic arrow press ":m[n,e,s,w]#" 
@@ -66,17 +79,17 @@ global dist
 dist = 0
 
 ############# initialize Pygame ###############
-pygame.init()
-pygame.joystick.init()
-joystick = pygame.joystick.Joystick(0)
-joystick.init()
+#pygame.init()
+#pygame.joystick.init()
+#joystick = pygame.joystick.Joystick(0)
+#joystick.init()
 
 
 ############### function definitions ###########
-def range():
-	camera.capture('rangeMeasure.jpg')
-	sevenSeg.measure()
-	return dist
+#def range():
+#	camera.capture('rangeMeasure.jpg')
+#	sevenSeg.measure()
+#	return dist
 	
 def rangeFocus(dist):
 	dist=dist
@@ -99,6 +112,7 @@ def flare(flare):
 		
 	GPIO.output(stepFlare, True)
 	GPIO.output(stepFlare, False)
+
 	
 
 done = False
@@ -113,12 +127,13 @@ flagStopTilt = False
 flagSpeed = False
 flagSpeedUp = False
 flagSpeedDown = False
-flagStopNewport = False
+newportStopped = True
 
 while done==False:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done == True
+
     LR = joystick.get_axis(2)        	# Right Joystick L/R
     home = joystick.get_button(12)    	# PS Button
     UD = joystick.get_axis(5)		# Right Joystick U/D
@@ -132,38 +147,7 @@ while done==False:
     leftBumper = joystick.get_button(5)	# Left Bumper
 
 ######## Button Map #########################
-"""
-Axes = 6
-0 Left Joystick LR
-1 Left Joystick UD
-2 Right Joystick LR
-3 Left Trigger
-4 Right Trigger
-5 Right Joystick UD
 
-Buttons: 14
-0:Square 
-1 X
-2 Circle
-3 Triangle
-4 Left Bumper
-5 Right Bumper
-6 Left Trigger 
-7 Right Trigger 
-8 Share
-9 Options
-10 Left Joystick Press
-11 Right Joystick Press
-12 PS Button
-13 Center Large Button
-
-Hats: 1
- D-pad
- (0,0)
-(L/R, U/D)
- Left Minus Down Minus
- Right Pos  Up Pos
-"""
     ########## Conditions #############
 
 	###### Motion #######
@@ -184,7 +168,7 @@ Hats: 1
 	mount.write(":me#")
 	flagUp = True
 	flagStopTilt = False
-	print "upping"
+	print "uping"
 	
     elif UD < -threshold and not flagDown:
 	mount.write(":mw#")
@@ -238,28 +222,32 @@ Hats: 1
 	measure()
 	rangeFocus(dist)
 	
-    elif not rightBumper and not flagStopNewport:
+    elif rightBumper < threshold and leftBumper < threshold and newportStopped== False:
 	newport.sendcmd('ST')
-	flagStopNewport = True
+	newportStopped = True
+	print "stopping right"
+ 
+#    elif leftBumper < threshold and newportStopped == False:
+#	newport.sendcmd('ST')
+#	newportStopped = True
+#	print "stopping left"
 
-    elif not leftBumper and not flagStopNewport:
-	newport.sendcmd('ST')
-	flagStopNewport = True
-	
-    elif rightBumper and not flagStopNewport:
+    elif rightBumper > threshold and newportStopped == True:
 	#newport.move_relative_um(100)
 	newport.move_absolute_mm(25)
-	flagStopNewport = False
+	newportStopped = False
+	print "right"
 	# use ser.write("1PT.1")
 	#time.sleep(1)
 	#GPIO.output(dirScope, True)
 	#GPIO.output(stepScope, True)
 	#GPIO.output(stepScope, False)
 	
-    elif leftBumper and not flagStopNewport:
+    elif leftBumper > threshold and newportStopped == True:
 	#newport.move_relative_um(-100)
-	flagStopNewport = False
 	newport.move_absolute_mm(0)
+	newportStopped = False
+	print "left"
 	#GPIO.output(dirScope, False)
 	#GPIO.output(stepScope, True)
 	#GPIO.output(stepScope, False)

@@ -1,8 +1,8 @@
 #Import pysmc
-from smc100 import *
+from SMC import *
 from time import sleep
 #create object on ttyUSB0 from dmesg | grep tty
-smc100 = SMC100(1, "/dev/ttyUSB0", silent=False)
+smc100 = SMC100(1, "/dev/newport", silent=False)
 print "resetting"
 smc100.reset_and_configure()
 sleep(5)
@@ -15,17 +15,10 @@ print "moving home"
 smc100.home()
 sleep(10)
 #make sure there are no errors
+print "no errors"
 
-assert smc100.get_status()[0] == 0
-
-pos = smc100.get_position_mm()
-print "moving 5mm absolute"
-smc100.move_absolute_mm(5)
-sleep(5)
-print "moving 3 relative"
-smc100.move_relative_mm(3)
-
-assert smc100.get_status()[0] ==0
-
+smc100.move_absolute_mm(10)
+time.sleep(1.5)
+smc100.stop()
 # Clean Up
 del smc100
