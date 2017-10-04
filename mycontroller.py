@@ -17,8 +17,9 @@ import sys
 ############## Initiate Pygame ################
 pygame.init()
 #pygame.camera.init()
-#pygame.display.init()
-#screen = pygame.display.set_mode((640,480))
+pygame.display.init()
+pygame.font.init()
+screen = pygame.display.set_mode((640,480))
 pygame.joystick.init()
 joystick = pygame.joystick.Joystick(0)
 joystick.init()
@@ -26,6 +27,11 @@ joystick.init()
 #cam_list = pygame.camera.list_cameras()
 #cam = pygame.camera.Camera(cam_list[0])
 #cam.start()
+
+def texts(dist):
+    font = pygame.font.Font(None, 30)
+    text=font.render("Newport Position:{}".format(newportPosition),1,(255,255,255))
+    screen.blit(text, (0,0))
 
 ############## Open connection to Mount#############
 try:
@@ -81,6 +87,9 @@ global speed
 speed = 9
 global dist
 dist = 0
+global newportPosition
+newporPosition = 0
+
 ############### function definitions ###########
 #def range():
 #       cam = cv2.VideoCapture(1)
@@ -220,7 +229,9 @@ while done==False:
     elif rightBumper < threshold and leftBumper < threshold and newportStopped== False:
 	newport.sendcmd('ST')
 	newportStopped = True
-
+	newportPosition = newport.get_position_um()
+	return newportPosition
+	
     elif rightBumper > threshold and newportStopped == True:
 	newport.move_absolute_mm(25)
 	newportStopped = False
@@ -228,6 +239,8 @@ while done==False:
     elif leftBumper > threshold and newportStopped == True:
 	newport.move_absolute_mm(0)
 	newportStopped = False
+
+############### Track and Range #####################
 
     elif range:
 	#access measure function this may change based on range finder
@@ -237,7 +250,8 @@ while done==False:
     elif track:
 	subprocess.call('python', 'run.py', shell=True)
     """	
-
+    
+    texts(newportPosition)
     time.sleep(.1)    
 
 ########### CLOSE ############
