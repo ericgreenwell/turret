@@ -6,12 +6,22 @@ import time
 import RPi.GPIO as GPIO
 import serial
 from subprocess import Popen, PIPE
+import time
+from datetime import datetime
+import pygame.camera
+from pygame.locals import *
+
 #import sevenSeg
 #from sevenSeg import measure
 from SMC import *
 import sys
 #from PIL import Image
 #import pytesseract
+
+############### Config #######################
+BLACK    = (   0,   0,   0)
+WHITE    = ( 255, 255, 255)
+RED      = ( 255,   0,   0)
 
 
 ############## Initiate Pygame ################
@@ -24,14 +34,23 @@ pygame.joystick.init()
 joystick = pygame.joystick.Joystick(0)
 joystick.init()
 
-cam_list = pygame.camera.list_cameras()
-cam = pygame.camera.Camera(cam_list[0])
-cam.start()
+DEVICE = '/dev/video0'
+SIZE = (640, 480)
+FILENAME = 'capture.png'
 
+display = pygame.display.set_mode(SIZE,0)
+camera = pygame.camera.Camera(DEVICE, SIZE)
+camera.start()
+screen = pygame.surface.Surface((640,480), 0, display)
+pygame.display.set_caption("Range Capture")
+clock = pygame.time.Clock()
+
+"""
 def texts(dist):
     font = pygame.font.Font(None, 30)
     text=font.render("Newport Position:{}".format(newportPosition),1,(255,255,255))
     screen.blit(text, (0,0))
+"""
 
 ############## Open connection to Mount#############
 try:
@@ -59,27 +78,8 @@ print "Moving home"
 # to stop this ":q#" or ":q[R,D]#" for 
 
 ########## GPIO SETUP #############3
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-
-
-# Label Pins
-dirFlare = 25
-stepFlare = 23
-homeFlare = 21
-
-#dirScope = 
-#stepScope = 
-#homeScope = 
-
-one32 = 12  #pin for 1/32 of a step
-
-#Setup Pins
-GPIO.setup(dirFlare, GPIO.OUT)
-GPIO.setup(stepFlare, GPIO.OUT)
-GPIO.setup(homeFlare, GPIO.IN)
-#fine motion
-GPIO.setup(one32, GPIO.OUT)
+#GPIO.setmode(GPIO.BCM)
+#GPIO.setwarnings(False)
 #################################################
 #settings for motors
 threshold = .35
@@ -89,6 +89,7 @@ global dist
 dist = 0
 global newportPosition
 newporPosition = 0
+standoff = 0
 
 ############### function definitions ###########
 def range():
@@ -116,7 +117,7 @@ def rangeFocus(dist):
 		time.sleep(.001)
 	print(">>> Adjusting for range of {} to target".format(dist))
 	# automate telescope here!
-
+"""
 def flare(flare):
 	if flare > 0:
 		GPIO.output(dirFlare, True)
@@ -125,8 +126,32 @@ def flare(flare):
 		
 	GPIO.output(stepFlare, True)
 	GPIO.output(stepFlare, False)
+"""	
+class TextPrint:
+    def __init__(self):
+        self.reset()
+        self.font = pygame.font.Font(None, 20)
+
+    def printy(self, display, textString):
+        textBitmap = self.font.render(textString, True, RED)
+        display.blit(textBitmap, [self.x, self.y])
+        self.y += self.line_height
+        
+    def reset(self):
+        self.x = 10
+        self.y = 10
+        self.line_height = 15
+        
+    def indent(self):
+        self.x += 10
+        
+    def unindent(self):
+        self.x -= 10
+	
 
 done = False
+textPrint = TextPrint()  #create instance of print text
+
 ############### handler ##################       
 #if name = "__main__":
 flagLeft = False
@@ -141,12 +166,16 @@ flagSpeedDown = False
 newportStopped = True
 
 while done==False:
-    image = cam.get_image()
-    image = pygame.transform.scale(image,(640,480))
-    screen.blit(image,(0,0))
-    texts(newportPosition)
-    pygame.display.update()
+    screen.fill(WHITE)
+    display.fill(WHITE)
+    textPrint.reset()
+    screen = camera.get_image(screen)
+    display.blit(screen, (0,0))
 
+    textPrint(display, "Time: {}".format(datetime.now())
+    textPrint(display, "Newport Position: {}".format(newportPosition))
+    textPrint(display, "Standoff: {}.format(standoff))
+	
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done == True
@@ -254,10 +283,11 @@ while done==False:
     
     #texts(newportPosition)
     time.sleep(.1)    
-
+    pygame.display.flip()
+	      
+    clock.tick()	      
 ########### CLOSE ############
 newport.close()
 mount.close()
-
 ############ EOF ###############
 
