@@ -172,7 +172,7 @@ while done==False:
     screen = camera.get_image(screen)
     display.blit(screen, (0,0))
 
-    textPrint(display, "Time: {}".format(datetime.now())
+    #textPrint(display, "Time: {}".format(datetime.now())
     textPrint(display, "Newport Position: {}".format(newportPosition))
     textPrint(display, "Standoff: {}.format(standoff))
 	
