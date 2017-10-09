@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 import pygame.camera
 from pygame.locals import *
-
+import os
 #import sevenSeg
 #from sevenSeg import measure
 from SMC import *
@@ -18,60 +18,58 @@ import sys
 #from PIL import Image
 #import pytesseract
 
+os.system("sudo modprobe -r uvcvideo")
+os.system("sudo modprobe uvcvideo")
+
 ############### Config #######################
 BLACK    = (   0,   0,   0)
 WHITE    = ( 255, 255, 255)
 RED      = ( 255,   0,   0)
-
 
 ############## Initiate Pygame ################
 pygame.init()
 pygame.camera.init()
 pygame.display.init()
 pygame.font.init()
-screen = pygame.display.set_mode((800,480))
 pygame.joystick.init()
 joystick = pygame.joystick.Joystick(0)
 joystick.init()
+
+modes = pygame.display.list_modes()
+
 
 DEVICE = '/dev/video0'
 SIZE = (640, 480)
 FILENAME = 'capture.png'
 
-display = pygame.display.set_mode(SIZE,0)
-camera = pygame.camera.Camera(DEVICE, SIZE)
-camera.start()
-screen = pygame.surface.Surface((640,480), 0, display)
+display = pygame.display.set_mode(modes[0], FULLSCREEN)
+screen = pygame.surface.Surface(modes[0], 0, display)
 pygame.display.set_caption("Range Capture")
 clock = pygame.time.Clock()
-
-"""
-def texts(dist):
-    font = pygame.font.Font(None, 30)
-    text=font.render("Newport Position:{}".format(newportPosition),1,(255,255,255))
-    screen.blit(text, (0,0))
-"""
 
 ############## Open connection to Mount#############
 try:
 	mount = serial.Serial('/dev/ioptron', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
 	newport = SMC100(1, '/dev/newport', silent=True) #10 ms for each  command
+	camera = pygame.camera.Camera(DEVICE, modes[0])
 except:
-   	print "One or more devices are not plugged in"
+   	os.system("sudo modprobe -r uvcvideo")
+	os.system("sudo modprobe uvcvideo")
+	camera = pygame.camera.Camera(DEVICE, modes[0])
+	print "One or more devices are not plugged in"
 
 # serial number and ID of Serial Device: persistant naming in /etc/udev/rules.d/99-usb-serial.rules
-
+camera.start()
 mount.write(':V#')
 newport.reset_and_configure()
-newport.home()
+newport.home(waitStop=True)
 print "Initializing hardware connection..."
-mount.write(':MountInfo#')
-print "Mount Info: {}".format(mount.readline())
 mount.write(':SR9#') # set speed
 print "Mount Speed Max"
 mount.write(':MH#')   #move mount home preassigned zero position
 print "Moving home"
-  
+time.sleep(5)
+
 ############################################################
 # Set speed "SRn#" where n=1-9
 # mimic arrow press ":m[n,e,s,w]#" 
@@ -80,19 +78,19 @@ print "Moving home"
 ########## GPIO SETUP #############3
 #GPIO.setmode(GPIO.BCM)
 #GPIO.setwarnings(False)
-#################################################
-#settings for motors
+
+############### Variable Definitions #####################
 threshold = .35
 global speed
 speed = 9
 global dist
 dist = 0
 global newportPosition
-newporPosition = 0
+newportPosition = 0
 standoff = 0
 
 ############### function definitions ###########
-def range():
+def rangeMeasure():
         cam = cv2.VideoCapture(1)
 	s, im = cam.read()
 	#may need to save/open/and turn gray
@@ -126,11 +124,12 @@ def flare(flare):
 		
 	GPIO.output(stepFlare, True)
 	GPIO.output(stepFlare, False)
-"""	
+"""
+	
 class TextPrint:
     def __init__(self):
         self.reset()
-        self.font = pygame.font.Font(None, 20)
+        self.font = pygame.font.Font(None, 50)
 
     def printy(self, display, textString):
         textBitmap = self.font.render(textString, True, RED)
@@ -173,8 +172,9 @@ while done==False:
     display.blit(screen, (0,0))
 
     #textPrint(display, "Time: {}".format(datetime.now())
-    textPrint(display, "Newport Position: {}".format(newportPosition))
-    textPrint(display, "Standoff: {}.format(standoff))
+    textPrint.printy(display, "Newport Position: {} um".format(newportPosition))
+    textPrint.printy(display, "Mount Speed (1-9): {}".format(speed))
+    textPrint.printy(display, "Standoff: {} m".format(standoff))
 	
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -182,6 +182,8 @@ while done==False:
 	    cam.stop()
 	    pygame.quit()
             sys.exit()
+	    os.system("sudo modprobe -r uvcvideo")
+            os.system("sudo modprobe uvcvideo")
 
     LR = joystick.get_axis(2)        	# Right Joystick L/R
     home = joystick.get_button(12)    	# PS Button
@@ -260,7 +262,6 @@ while done==False:
 	newport.sendcmd('ST')
 	newportStopped = True
 	newportPosition = newport.get_position_um()
-	return newportPosition
 	
     elif rightBumper > threshold and newportStopped == True:
 	newport.move_absolute_mm(25)
@@ -276,18 +277,14 @@ while done==False:
 	#access measure function this may change based on range finder
 	measure()
 	rangeFocus(dist)
-    """
-    elif track:
-	subprocess.call('python', 'run.py', shell=True)
-    """	
-    
-    #texts(newportPosition)
-    time.sleep(.1)    
+        
     pygame.display.flip()
 	      
     clock.tick()	      
 ########### CLOSE ############
 newport.close()
 mount.close()
+os.system("sudo modprobe -r uvcvideo")
+os.system("sudo modprobe uvcvideo")
 ############ EOF ###############
 
