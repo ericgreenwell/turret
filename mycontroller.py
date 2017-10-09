@@ -16,17 +16,17 @@ import sys
 
 ############## Initiate Pygame ################
 pygame.init()
-#pygame.camera.init()
+pygame.camera.init()
 pygame.display.init()
 pygame.font.init()
-screen = pygame.display.set_mode((640,480))
+screen = pygame.display.set_mode((800,480))
 pygame.joystick.init()
 joystick = pygame.joystick.Joystick(0)
 joystick.init()
 
-#cam_list = pygame.camera.list_cameras()
-#cam = pygame.camera.Camera(cam_list[0])
-#cam.start()
+cam_list = pygame.camera.list_cameras()
+cam = pygame.camera.Camera(cam_list[0])
+cam.start()
 
 def texts(dist):
     font = pygame.font.Font(None, 30)
@@ -43,14 +43,14 @@ except:
 # serial number and ID of Serial Device: persistant naming in /etc/udev/rules.d/99-usb-serial.rules
 
 mount.write(':V#')
+newport.reset_and_configure()
+newport.home()
 print "Initializing hardware connection..."
 mount.write(':MountInfo#')
 print "Mount Info: {}".format(mount.readline())
 mount.write(':SR9#') # set speed
 print "Mount Speed Max"
 mount.write(':MH#')   #move mount home preassigned zero position
-newport.reset_and_configure()
-newport.home()
 print "Moving home"
   
 ############################################################
@@ -91,14 +91,14 @@ global newportPosition
 newporPosition = 0
 
 ############### function definitions ###########
-#def range():
-#       cam = cv2.VideoCapture(1)
-#	s, im = cam.read()
+def range():
+        cam = cv2.VideoCapture(1)
+	s, im = cam.read()
 	#may need to save/open/and turn gray
-#	text = pytesseract.image_to_string(Image.open(im))
-#	print range
-#	return range
-#	cv2.imwrite("rangeMeasure.jpg", im[0:0, 0:0]) #y:y+h x:x+w from top left
+	text = pytesseract.image_to_string(Image.open(im))
+	print text
+	return text
+	cv2.imwrite("rangeMeasure.jpg", im[0:0, 0:0]) #y:y+h x:x+w from top left
 
 #	camera.capture('rangeMeasure.jpg')
 #	sevenSeg.measure()
@@ -141,17 +141,18 @@ flagSpeedDown = False
 newportStopped = True
 
 while done==False:
-#    image = cam.get_image()
-#    image = pygame.transform.scale(image,(640,480))
-#    screen.blit(image,(0,0))
-#    pygame.display.update()
+    image = cam.get_image()
+    image = pygame.transform.scale(image,(640,480))
+    screen.blit(image,(0,0))
+    texts(newportPosition)
+    pygame.display.update()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done == True
-	   # cam.stop()
+	    cam.stop()
 	    pygame.quit()
-            #sys.exit()
+            sys.exit()
 
     LR = joystick.get_axis(2)        	# Right Joystick L/R
     home = joystick.get_button(12)    	# PS Button
@@ -181,13 +182,13 @@ while done==False:
         flagRight = True
 	flagStopPan = False
 		
-    elif UD < -threshold and not flagUp:
-	mount.write(":me#")
+    elif UD > threshold and not flagUp:
+	mount.write(":mw#")
 	flagUp = True
 	flagStopTilt = False
 		
-    elif UD > threshold and not flagDown:
-	mount.write(":mw#")
+    elif UD < -threshold and not flagDown:
+	mount.write(":me#")
 	flagDown = True
 	flagStopTilt = False
 	
@@ -251,7 +252,7 @@ while done==False:
 	subprocess.call('python', 'run.py', shell=True)
     """	
     
-    texts(newportPosition)
+    #texts(newportPosition)
     time.sleep(.1)    
 
 ########### CLOSE ############

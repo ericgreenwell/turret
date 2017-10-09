@@ -123,9 +123,7 @@ while done==False:
         textPrint.unindent()
 	"""
     
-    # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
-    
-    # Go ahead and update the screen with what we've drawn.
+    # ALL CODE TO DRAW SHOULD GO ABOVE THIS     # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
 
     # Limit to 20 frames per second
