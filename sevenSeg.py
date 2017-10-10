@@ -23,9 +23,9 @@ def measure():
 		(1, 1, 1, 1, 0, 1, 1): 9
 	}
 
-	image = cv2.imread("rangeMeasure.jpg")
+	#image = cv2.imread("rangeMeasure.jpg")
 	# crop THIS IS SPECIFIC TO THIS IMAGE!!!
-	image = image[2300:2700, 1400:1800]  #y:y+h x:x+w
+	#image = image[2300:2700, 1400:1800]  #y:y+h x:x+w
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	kernel = np.ones((5,5), np.uint8)
 	gray = cv2.dilate(gray, kernel, iterations=2)

@@ -98,13 +98,11 @@ def rangeMeasure():
 	#pic=pic[0:10,0:10]
 	#may need to save/open/and turn gray
 	text = pytesseract.image_to_string(pic)
+	#text = sevenSeg.measure(pic)
+
 	print text
 	standoff = text
 	#cv2.imwrite("rangeMeasure.jpg", im[0:0, 0:0]) #y:y+h x:x+w from top left
-
-#	camera.capture('rangeMeasure.jpg')
-#	sevenSeg.measure()
-#	return dist
 	
 def rangeFocus(standoff):
 	dist = standoff
@@ -265,7 +263,7 @@ while done==False:
     elif range:
 	#access measure function this may change based on range finder
 	measure()
-	rangeFocus(dist)
+	#rangeFocus(dist)
 ################## QUIT #########################
     
     elif quit:
