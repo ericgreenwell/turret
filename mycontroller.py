@@ -17,7 +17,7 @@ import sys
 #from PIL import Image
 #import pytesseract
 
-#in the event the video was not closed properly turn off and on uvcvideo
+# Disable video drivers incase failed closeout
 os.system("sudo modprobe -r uvcvideo")
 time.sleep(2)
 os.system("sudo modprobe uvcvideo")
@@ -38,25 +38,26 @@ joystick.init()
 
 modes = pygame.display.list_modes()
 
-
-DEVICE = '/dev/video0'
-FILENAME = 'capture.png'
+VID = '/dev/video0'
+MOUNT = '/dev/ioptron'
+NEWPORT = '/dev/newport'
+FLARE = '/dev/flare'
 
 display = pygame.display.set_mode(modes[0], FULLSCREEN)
 screen = pygame.surface.Surface(modes[0], 0, display)
 pygame.display.set_caption("Range Capture")
 clock = pygame.time.Clock()
 
-############## Open connection to Mount#############
+############## Open Hardware Connections #############
 try:
-	mount = serial.Serial('/dev/ioptron', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
-	newport = SMC100(1, '/dev/newport', silent=True) #10 ms for each  command
-	#flare = serial.Serial('/dev/DEVICE', baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE,timeout=0.5)
-	camera = pygame.camera.Camera(DEVICE, modes[0])
+	mount = serial.Serial(MOUNT, baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, timeout =0)
+	newport = SMC100(1, NEWPORT, silent=True) #10 ms for each  command
+	#flare = serial.Serial(FLARE, baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE,timeout=0.5)
+	camera = pygame.camera.Camera(VID, modes[0])
 except:
    	os.system("sudo modprobe -r uvcvideo")
 	os.system("sudo modprobe uvcvideo")
-	camera = pygame.camera.Camera(DEVICE, modes[0])
+	camera = pygame.camera.Camera(, modes[0])
 	print "One or more devices are not plugged in"
 
 # serial number and ID of Serial Device: persistant naming in /etc/udev/rules.d/99-usb-serial.rules
@@ -175,11 +176,11 @@ while done==False:
             os.system("sudo modprobe uvcvideo")
 
     LR = joystick.get_axis(2)        	# Right Joystick L/R
-    home = joystick.get_button(12)    	# PS Button
+    quit = joystick.get_button(12)    	# PS Button
     UD = joystick.get_axis(5)		# Right Joystick U/D
     DirPad = joystick.get_hat(0)	# Dpad
     range = joystick.get_button(3)	# X
-    #button = joystick.get_button(1)    # Triangle
+    home  = joystick.get_button(1)    # Triangle
     track = joystick.get_button(2)	# Circle
     LLR = joystick.get_axis(0)		# Left Joystick L/R
     flare = joystick.get_axis(1)	# Left Joystick U/D
@@ -235,6 +236,7 @@ while done==False:
 	mount.write(":SR{}#".format(speed))
 	print "Mount Speed: {}".format(speed)
 	
+	######### HOMING #######
     elif home:
         mount.write(":MH#")
 	newport.home()
@@ -264,14 +266,21 @@ while done==False:
 	#access measure function this may change based on range finder
 	measure()
 	rangeFocus(dist)
-        
-    pygame.display.flip()
-	      
-    clock.tick()	      
-########### CLOSE ############
+################## QUIT #########################
+    
+    elif quit:
+	done = True
+########## UPDATE AND DRAW #################3
+    
+    pygame.display.flip()	      
+    clock.tick()	 
+     
+########### CLOSE AFTER QUIT ############
 newport.close()
 mount.close()
-os.system("sudo modprobe -r uvcvideo")
-os.system("sudo modprobe uvcvideo")
+camera.stop()
+
+#os.system("sudo modprobe -r uvcvideo")
+#os.system("sudo modprobe uvcvideo")
 ############ EOF ###############
 
