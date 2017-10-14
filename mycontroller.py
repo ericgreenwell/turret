@@ -63,8 +63,6 @@ try:
 	#flare = serial.Serial(FLARE, baudrate=9600,bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE,timeout=0.5)
 	camera = pygame.camera.Camera(VID, modes[0])
 except:
-   	os.system("sudo modprobe -r uvcvideo")
-	os.system("sudo modprobe uvcvideo")
 	camera = pygame.camera.Camera(VID, modes[0])
 	print "One or more devices are not plugged in"
 
