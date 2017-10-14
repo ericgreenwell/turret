@@ -65,7 +65,7 @@ try:
 except:
    	os.system("sudo modprobe -r uvcvideo")
 	os.system("sudo modprobe uvcvideo")
-	camera = pygame.camera.Camera(, modes[0])
+	camera = pygame.camera.Camera(VID, modes[0])
 	print "One or more devices are not plugged in"
 
 # serial number and ID of Serial Device: persistant naming in /etc/udev/rules.d/99-usb-serial.rules
