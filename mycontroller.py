@@ -18,9 +18,17 @@ import sys
 #import pytesseract
 
 # Disable video drivers incase failed closeout
-os.system("sudo modprobe -r uvcvideo")
-time.sleep(2)
-os.system("sudo modprobe uvcvideo")
+subprocess.Popen("sudo modprobe -r uvcvideo", shell=True)
+
+while True:
+	if os.path.exists("/dev/video0"):
+		print "camera found"
+		break
+	else:
+		subprocess.Popen("sudo modprobe uvcvideo", shell = True)
+		time.sleep(2)
+		print ">>> Attempting to reconnect to video camera"
+
 
 ############### Config #######################
 BLACK    = (   0,   0,   0)
