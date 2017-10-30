@@ -10,6 +10,7 @@ from time import sleep
 import pygame.camera
 from pygame.locals import *
 import os
+import math
 #import sevenSeg
 #from sevenSeg import measure
 from SMC import *
@@ -96,6 +97,8 @@ dist = 0
 global newportPosition
 newportPosition = 0
 standoff = 0
+newStandoff = 0
+centerlineToRotary = .2032          #in meters of visual driving optic to center axis of rotary stage
 
 ############### function definitions ###########
 def rangeMeasure():
@@ -266,12 +269,33 @@ while done==False:
 
 ############### Track and Range #####################
 
+	# manual range adjustment
+    elif DirPad[0] == 1 and standoff < 200:
+	newStandoff += 1
+	timeSince = time.time()
+	#mount.write(":SR{}#".format(speed))
+	print "Focused Range(m): {}".format(newStandoff)
+
+    elif DirPad[0] == -1 and standoff > 15:
+	newStandoff -= 1
+	timeSince = time.time()
+	#mount.write(":SR{}#".format(speed))
+	print "Focused Range(m): {}".format(newStandoff)
+
+    elif time.time() - timeSince >= 10:
+	standoff = newStandoff
+	#adjust angle
+	angle = math.atan(centerlineToRotary/standoff)
+	
+	#adjust laser
+	#adjust telescope focusing mech
+	
+
     elif range:
 	#access measure function this may change based on range finder
 	measure()
 	#rangeFocus(dist)
 ################## QUIT #########################
-    
     elif quit:
 	done = True
 ########## UPDATE AND DRAW #################3
