@@ -96,9 +96,10 @@ global dist
 dist = 0
 global newportPosition
 newportPosition = 0
-standoff = 0
-newStandoff = 0
+standoff = 20
+newStandoff = 20
 centerlineToRotary = .2032          #in meters of visual driving optic to center axis of rotary stage
+count = 0
 
 ############### function definitions ###########
 def rangeMeasure():
@@ -272,22 +273,24 @@ while done==False:
 	# manual range adjustment
     elif DirPad[0] == 1 and standoff < 200:
 	newStandoff += 1
-	timeSince = time.time()
+	count = 0
 	#mount.write(":SR{}#".format(speed))
 	print "Focused Range(m): {}".format(newStandoff)
 
     elif DirPad[0] == -1 and standoff > 15:
 	newStandoff -= 1
-	timeSince = time.time()
+	count = 0
 	#mount.write(":SR{}#".format(speed))
 	print "Focused Range(m): {}".format(newStandoff)
 
-    elif time.time() - timeSince >= 10:
+    elif standoff != newStandoff and count >= 100:
 	standoff = newStandoff
 	#adjust angle
-	angle = math.atan(centerlineToRotary/standoff)
-	
+	angle = math.atan(centerlineToRotary/standoff) # radians
+	#laser.write("MOV 1 XX")		MOV 1 20# Command MOV (p. 211) MOV {<AxisID> <Position>} Set Target Position
+	#scope.write("MOV 2 XX")
 	#adjust laser
+	#newport.move_absolute_um(figure it out)
 	#adjust telescope focusing mech
 	
 
@@ -299,7 +302,7 @@ while done==False:
     elif quit:
 	done = True
 ########## UPDATE AND DRAW #################3
-    
+    count += 1
     pygame.display.flip()	      
     clock.tick()	 
      
